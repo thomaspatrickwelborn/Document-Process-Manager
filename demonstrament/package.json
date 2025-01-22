@@ -1,0 +1,8 @@
+{
+  "name": "document-process-manager-demonstrament",
+  "author": "Thomas Patrick Welborn",
+  "description": "Document Process Manager Demonstrament",
+  "license": "ISC",
+  "type": "module",
+  "main": "index.js"
+}
