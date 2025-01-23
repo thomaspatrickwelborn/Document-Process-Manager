@@ -5,7 +5,6 @@ import { rm, mkdir, readFile } from 'node:fs'
 import { globSync } from 'glob'
 import watch from 'glob-watcher'
 export default class Section extends EventTarget {
-  length = 0
   #settings
   #sections
   #pilers
@@ -19,6 +18,7 @@ export default class Section extends EventTarget {
     this.#settings = $settings
     this.#sections = $sections
     this.active = this.#settings.active
+    console.log(this)
   }
   get active() { return this.#active }
   set active($active) {
@@ -42,22 +42,19 @@ export default class Section extends EventTarget {
   get main() { return this.#settings.main }
   get ignore() {
     if(this.#ignore !== undefined) { return this.#ignore }
-    this.#ignore = Array.prototype.concat(
-      // Settings - Ignore
-      this.settings.ignore.map(
-        ($ignorePath) => path.join(this.section.source, $ignorePath)
-      ),
-      // Section - Ignore
-      this.section.ignore.map(
-        ($ignorePath) => path.join(this.section.source, $ignorePath)
-      )
+    this.#ignore = this.#settings.ignore.map(
+      ($ignorePath) => path.join(this.source, $ignorePath)
     )
     return this.#ignore
   }
-  get pilers() { return Object.fromEntries(Array.from(this)) }
+  get pilers() {
+    if(this.#pilers !== undefined) { return this.#pilers }
+    this.#pilers = {}
+    return this.#pilers
+  }
   async #addPilers() {
     iteratePilers: 
-    for(const $piler of [
+    for(const $pilerType of [
       'sans',
       // 'simules',
       // 'styles',
@@ -66,21 +63,12 @@ export default class Section extends EventTarget {
     ]) {
       const pilers = []
       iteratePilerSettings: 
-      for(const $pilers of this.#settings.pilers[$piler]) {
-        const pilerName = $pilers.name
-        const pilersIndex = pilers.findIndex(
-          ([$pilerName, $pilers]) => $pilerName === pilerName
-        )
-        const Piler = Pilers[$pilers.name]
-        const piler = new Piler($pilers, this)
-        if(pilersIndex === -1) {
-          pilers.push([pilerName, [piler]])
-        }
-        else {
-          pilers[pilersIndex][1].push(piler)
-        }
+      for(const $piler of this.#settings.pilers[$pilerType]) {
+        this.pilers[$pilerType] = this.pilers[$pilerType] || []
+        const Piler = Pilers[$piler.name]
+        const piler = new Piler($piler, this)
+        this.pilers[$pilerType].push(piler)
       }
-      Array.prototype.push.call(this, ...pilers)
     }
     return this.#depile()
   }
@@ -89,14 +77,10 @@ export default class Section extends EventTarget {
   }
   async #depile() {
     if(this.#depiled) { return this } 
-    iteratePilers: 
-    for(const $pilerInstances of Object.values(this.pilers)) {
-      iteratePilerInstances: 
-      for(const $pilerInstance of $pilerInstances) {
-        if($pilerInstance.type === '  ') {
-          await $pilerInstance.pile()
-        }
-      }
+    iterateSansPilers: 
+    for(const $pilerInstance of this.pilers.sans) {
+      console.log($pilerInstance)
+      await $pilerInstance.pile()
     }
     this.#depiled = true
     return this

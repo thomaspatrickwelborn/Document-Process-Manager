@@ -16,10 +16,10 @@ export default class DocumentProcessManager extends EventTarget {
     super()
     this.#settings = $settings
     this.inspector
-    this.server
-    this.https
-    // this.sections
-    this.browserSync
+    // this.server
+    // this.https
+    this.sections
+    // this.browserSync
   }
   get name() { return this.#settings.name }
   // Node Inspector

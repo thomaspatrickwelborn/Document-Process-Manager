@@ -16,7 +16,6 @@ export default class Sections extends EventTarget {
     super()
     this.#settings = $settings
     this.#watcher
-    console.log(this)
   }
   get source() {
     if(this.#settings.source !== undefined) return this.#settings.source

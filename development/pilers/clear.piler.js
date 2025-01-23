@@ -1,5 +1,7 @@
 import path from 'node:path'
+import { globSync } from 'glob'
 import Piler from './piler/index.js'
+import { rm } from 'node:fs'
 export default class ClearPiler extends Piler {
   #target
   #path
@@ -37,7 +39,6 @@ export default class ClearPiler extends Piler {
         })
       )
     }
-    // return Promise.all(clear)
-    return Promise.all([])
+    return Promise.all(clear)
   }
 }
