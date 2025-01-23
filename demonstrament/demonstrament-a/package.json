@@ -1,0 +1,11 @@
+{
+  "name": "dpm-demonstrament-a",
+  "author": "Thomas Patrick Welborn",
+  "description": "DPM | Demonstrament A",
+  "license": "ISC",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --config nodemon.config.json"
+  }
+}

@@ -5,7 +5,7 @@
 > Use At Own Risk  
 
 > [!NOTE]  
-> Interested in MVC Framework? 
+> Interested in Document Process Manager? 
 > thomas.patrick.welborn@outlook.com
 
 # Document Process Manager

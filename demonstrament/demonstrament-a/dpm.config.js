@@ -7,20 +7,20 @@ certificates.cert.file = await readFile(
   certificates.cert.path
 )
 export default {
-  name: "MVC Framework Demonstrament", 
+  name: "Document Process Manager", 
   inspector: {
-    port: 9238,
+    port: 9239,
     host: "127.0.0.1",
   },
   https: {
     key: certificates.key.file,
     cert: certificates.cert.file,
-    port: 3338,
-    host: "demonstrament.mvc-framework",
+    port: 3340,
+    host: "dpm.demonstrament-a",
   },
   browserSync: {
-    port: 3339,
-    host: "demonstrament.mvc-framework",
+    port: 3341,
+    host: "dpm.demonstrament-a",
     https: {
       key: certificates.key.path,
       cert: certificates.cert.path,

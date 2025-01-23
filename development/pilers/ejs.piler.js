@@ -29,7 +29,6 @@ export default class EJSPiler extends Piler {
     // Server
     if(settings.outputType === 'server') {
       try {
-        // const modelPath = path.join(section.source, settings.model)
         const model = JSON.parse(await readFile(this.model))
         const templatePath = path.join(section.source, this.input)
         const viewPile = await ejs.renderFile(templatePath, model, {

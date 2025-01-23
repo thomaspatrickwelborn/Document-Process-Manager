@@ -1,0 +1,12 @@
+{
+  "ext": "ejs,js,json",
+  "exec": "node index.js",
+  "watch": [
+    "index.js",
+    "package.json",
+    "nodemon.config.json",
+    "dpm.config.js",
+    "sections/**/\\$route.js",
+    "../../development/**"
+  ]
+}

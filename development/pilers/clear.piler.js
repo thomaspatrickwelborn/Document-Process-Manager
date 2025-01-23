@@ -23,18 +23,16 @@ export default class ClearPiler extends Piler {
     const depilePaths = globSync(this.path, {
       ignore: this.ignore
     })
-    console.log("depilePaths", depilePaths)
     for(const $depilePath of depilePaths) {
       clear.push(
         new Promise(($resolve, $reject) => {
-          // rm($depilePath, {
-          //   recursive: true,
-          //   force: true,
-          // }, ($err) => {
-          //   if($err) { $reject($err) }
-          //   else { $resolve(true) }
-          // })
-          console.log($depilePath)
+          rm($depilePath, {
+            recursive: true,
+            force: true,
+          }, ($err) => {
+            if($err) { $reject($err) }
+            else { $resolve(true) }
+          })
           $resolve(true)
         })
       )

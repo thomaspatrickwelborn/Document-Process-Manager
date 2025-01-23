@@ -1,17 +1,10 @@
 {
   "name": "document-process-manager-development",
   "author": "Thomas Patrick Welborn",
-  "description": "Document Process Manager Development",
+  "description": "DPM | Development",
   "license": "ISC",
   "type": "module",
   "main": "index.js",
-  "scripts": {
-    "start": "nodemon --config nodemon.config.json"
-  },
-  "imports": {},
-  "workspaces": [
-    "development"
-  ],
   "devDependencies": {
     "browser-sync": "^3.0.3",
     "browser-sync-client": "^3.0.3",

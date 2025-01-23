@@ -1,1 +1,19 @@
-index.json
+{
+  "title": "MVC Framework Projects",
+  "styles": [{
+    "tag": "link",
+    "attributes": {
+      "rel": "stylesheet",
+      "type": "text/css",
+      "href": "./index.css"
+    },
+    "selfClose": true
+  }],
+  "scripts": [{
+    "tag": "script",
+    "attributes": {
+      "type": "module",
+      "src": "./index.js"
+    }
+  }]
+}
