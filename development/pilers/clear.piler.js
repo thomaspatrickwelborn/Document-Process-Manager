@@ -10,7 +10,7 @@ export default class ClearPiler extends Piler {
   }
   get target() {
     if(this.#target !== undefined) { return this.#target }
-    this.#target = path.join(this.section[this.settings.target])
+    this.#target = this.section[this.settings.target]
     return this.#target
   }
   get path() {

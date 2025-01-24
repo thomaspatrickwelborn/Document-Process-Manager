@@ -6,15 +6,15 @@ import { cp, mkdir } from 'node:fs/promises'
 export default class SimulePiler extends Piler {
   constructor() {
     super(...arguments)
+    this.watcher
   }
   async pile($path) {
-    console.log("SimulePiler", "$path", $path)
-    if(micromatch($path, $settings.input)) {
-      if($settings.outputType === 'path') {
+    if(micromatch($path, this.settings.input)) {
+      if(this.settings.outputType === 'path') {
         try {
-          const createDirPath = path.join($route.target, $settings.output)
+          const createDirPath = path.join(this.section.target, this.settings.output)
           const copyPath = path.join(
-            $route.target, $settings.output
+            this.section.target, this.settings.output
           )
           await createDir(createDirPath)
           await cp($path, copyPath, {
@@ -24,12 +24,12 @@ export default class SimulePiler extends Piler {
         }
         catch($err) { console.log($err) }
       }
-      else if($settings.outputType === 'glob') {
+      else if(this.settings.outputType === 'glob') {
         try {
-          const createDirPath = path.join($route.target, $settings.output)
+          const createDirPath = path.join(this.section.target, this.settings.output)
           const copyPath = $path.replace(
-            new RegExp(`^${$route.source}`), 
-            $route.target
+            new RegExp(`^${this.section.source}`), 
+            this.section.target
           )
           await createDir($path)
           await cp($path, copyPath, {

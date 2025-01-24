@@ -18,7 +18,6 @@ export default class Section extends EventTarget {
     this.#settings = $settings
     this.#sections = $sections
     this.active = this.#settings.active
-    console.log(this)
   }
   get active() { return this.#active }
   set active($active) {
@@ -56,10 +55,10 @@ export default class Section extends EventTarget {
     iteratePilers: 
     for(const $pilerType of [
       'sans',
-      // 'simules',
-      // 'styles',
-      // 'scripts',
-      // 'structs'
+      'simules',
+      'styles',
+      'scripts',
+      'structs',
     ]) {
       const pilers = []
       iteratePilerSettings: 
@@ -68,9 +67,13 @@ export default class Section extends EventTarget {
         const Piler = Pilers[$piler.name]
         const piler = new Piler($piler, this)
         this.pilers[$pilerType].push(piler)
+        console.log(piler)
+        if(piler.type === 'sans') {
+          await piler.pile()
+        }
       }
     }
-    return this.#depile()
+    return this
   }
   async #removePilers() {
     return await this.#depile()
@@ -79,7 +82,6 @@ export default class Section extends EventTarget {
     if(this.#depiled) { return this } 
     iterateSansPilers: 
     for(const $pilerInstance of this.pilers.sans) {
-      console.log($pilerInstance)
       await $pilerInstance.pile()
     }
     this.#depiled = true

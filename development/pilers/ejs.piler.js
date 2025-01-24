@@ -1,6 +1,7 @@
+import { fileURLToPath } from 'url'
+import path from 'node:path'
 import Piler from './piler/index.js'
 import createDir from '../coutil/createDir/index.js'
-import path from 'node:path'
 import beautify from 'js-beautify'
 import ejs from 'ejs'
 import { readFile } from 'node:fs/promises'
@@ -9,16 +10,23 @@ export default class EJSPiler extends Piler {
   #settings
   #section
   #model
+  #_root
   constructor($settings, $section) {
     super(...arguments)
     this.#settings
     this.#section
+    this.watcher
   }
   get outputType() { return this.#settings.outputType }
   get model() {
     if(this.#model !== undefined) { return this.#model }
-    this.#model = path.join(this.section.source, settings.model)
+    this.#model = path.join(this.section.source, this.settings.model)
     return this.#model
+  }
+  get #root() {
+    if(this.#_root !== undefined) { return this.#_root }
+    this.#_root = fileURLToPath(import.meta.url)
+    return this.#_root
   }
   async pile($path) {
     const settings = this.settings
@@ -30,22 +38,23 @@ export default class EJSPiler extends Piler {
     if(settings.outputType === 'server') {
       try {
         const model = JSON.parse(await readFile(this.model))
-        const templatePath = path.join(section.source, this.input)
+        const templatePath = this.input
         const viewPile = await ejs.renderFile(templatePath, model, {
           async: true,
           localsName,
           root: [
             path.join(
-              process.env.PWD, 'application/templates', 
+              this.#root,
+              '../../templates'
             )
-          ],
+          ]
         })
         const viewPileBeautify = beautify.html(viewPile, {
           maxPreserveNewlines: 0,
           indentSize: 2,
           indentChar: ' ',
         })
-        const writeFilePath = path.join(section.target, this.output)
+        const writeFilePath = this.output
         writeFile(writeFilePath, viewPileBeautify, ($err) => console.log)
       }
       catch($err) { console.log($err) }

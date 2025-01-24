@@ -6,18 +6,18 @@ import { stat, mkdir, writeFile } from 'node:fs/promises'
 export default class SASSPiler extends Piler {
   constructor() {
     super(...arguments)
+    this.watcher
   }
   async pile($path) {
-    console.log("SassPiler", "$path", $path)
-    await createDir(this.settings.output)
+    await createDir(this.output)
     const sourceMapExtension = '.css.map'
-    const sassPilePath = this.settings.input
-    const sassFilePath = this.settings.output
+    const sassPilePath = this.input
+    const sassFilePath = this.output
     const sourceMapFilePath = [
-      '.', path.basename(this.settings.output).concat('.map')
+      '.', path.basename(this.output).concat('.map')
     ].join('/')
     const sassFileSourceMapPend = `'\n/*# sourceMappingURL=${sourceMapFilePath} */`
-    const sassFileSourceMapPath = this.settings.output.replace(
+    const sassFileSourceMapPath = this.output.replace(
       new RegExp(/\.css$/), sourceMapExtension
     )
     try {

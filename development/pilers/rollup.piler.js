@@ -5,16 +5,17 @@ import createDir from '../coutil/createDir/index.js'
 export default class RollupPiler extends Piler{
   constructor() {
     super(...arguments)
+    this.watcher
   }
   async pile($path) {
-    await createDir($settings.output)
+    await createDir(this.output)
     try {
-      const inputPath = path.join(this.section.source, this.settings.input)
+      const inputPath = this.input
       const rollupPile = await rollup.rollup({
-        external: $settings.external,
+        external: this.settings.external,
         input: inputPath,
       })
-      const rollupFilePath = path.join(this.section.target, this.settings.output)
+      const rollupFilePath = this.output
       await rollupPile.write({
         file: rollupFilePath,
         format: 'es',

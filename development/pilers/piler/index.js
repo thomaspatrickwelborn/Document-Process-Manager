@@ -1,4 +1,5 @@
 import path from 'node:path'
+import watch from 'glob-watcher'
 export default class Piler extends EventTarget {
   settings
   section
@@ -13,6 +14,7 @@ export default class Piler extends EventTarget {
     this.settings = $settings
     this.section = $section
   }
+  get type() { return this.settings.type }
   get input() {
     if(this.#input !== undefined) { return this.#input }
     this.#input = path.join(this.section.source, this.settings.input)
@@ -25,9 +27,10 @@ export default class Piler extends EventTarget {
   }
   get watch() {
     if(this.#watch !== undefined) { return this.#watch }
-    this.#watch = this.settings.watch.map(
+    const watch = this.settings.watch?.map(
       ($watchPath) => path.join(this.section.source, $watchPath)
     )
+    if(watch) { this.#watch = watch }
     return this.#watch
   }
   get ignore() {
@@ -44,13 +47,16 @@ export default class Piler extends EventTarget {
   }
   get watcher() {
     if(this.#watcher !== undefined) { return this.#watcher }
-    const watcher = watch(this.watch, {
-      ignored: this.ignore,
-      ignoreInitial: false,
-      awaitWriteFinish: true,
-    })
-    watcher.on('add', ($path, $stats) => this.#boundPile($path))
-    watcher.on('change', ($path, $stats) => this.#boundPile($path))
+    let watcher
+    if(this.watch) {
+      watcher = watch(this.watch, {
+        ignored: this.ignore,
+        ignoreInitial: false,
+        awaitWriteFinish: true,
+      })
+      watcher.on('add', ($path, $stats) => this.#boundPile($path))
+      watcher.on('change', ($path, $stats) => this.#boundPile($path))
+    }
     this.#watcher = watcher
     return this.#watcher
   }
