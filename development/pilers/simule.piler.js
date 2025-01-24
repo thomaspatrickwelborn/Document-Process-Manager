@@ -1,4 +1,4 @@
-import Piler from './piler/index.js'
+import Piler from '../piler/index.js'
 import createDir from '../coutil/createDir/index.js'
 import micromatch from 'micromatch'
 import path from 'node:path'

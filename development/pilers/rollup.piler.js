@@ -1,4 +1,4 @@
-import Piler from './piler/index.js'
+import Piler from '../piler/index.js'
 import path from 'node:path'
 import * as rollup from 'rollup'
 import createDir from '../coutil/createDir/index.js'

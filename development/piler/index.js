@@ -3,6 +3,7 @@ import watch from 'glob-watcher'
 export default class Piler extends EventTarget {
   settings
   section
+  #active = false
   #input
   #output
   #watch
@@ -13,6 +14,19 @@ export default class Piler extends EventTarget {
     super()
     this.settings = $settings
     this.section = $section
+  }
+  get active() { return this.#active }
+  set active($active) {
+    if(this.#active === $active) { return }
+    if(this.watcher !== undefined) {
+      if($active === true) {
+        this.watcher.on('ready', () => {})
+      }
+      else if($active === false) {
+        this.watcher.close()
+      }
+    }
+    this.#active = $active
   }
   get type() { return this.settings.type }
   get input() {
@@ -27,10 +41,11 @@ export default class Piler extends EventTarget {
   }
   get watch() {
     if(this.#watch !== undefined) { return this.#watch }
-    const watch = this.settings.watch?.map(
+    if(!this.settings.watch) { return this.#watch }
+    const watch = this.settings.watch.map(
       ($watchPath) => path.join(this.section.source, $watchPath)
     )
-    if(watch) { this.#watch = watch }
+    if(watch.length) { this.#watch = watch }
     return this.#watch
   }
   get ignore() {
@@ -47,16 +62,14 @@ export default class Piler extends EventTarget {
   }
   get watcher() {
     if(this.#watcher !== undefined) { return this.#watcher }
-    let watcher
-    if(this.watch) {
-      watcher = watch(this.watch, {
-        ignored: this.ignore,
-        ignoreInitial: false,
-        awaitWriteFinish: true,
-      })
-      watcher.on('add', ($path, $stats) => this.#boundPile($path))
-      watcher.on('change', ($path, $stats) => this.#boundPile($path))
-    }
+    if(this.watch === undefined) { return this.#watcher }
+    let watcher = watch(this.watch, {
+      ignored: this.ignore,
+      ignoreInitial: false,
+      awaitWriteFinish: true,
+    })
+    watcher.on('add', ($path, $stats) => this.#boundPile($path))
+    watcher.on('change', ($path, $stats) => this.#boundPile($path))
     this.#watcher = watcher
     return this.#watcher
   }

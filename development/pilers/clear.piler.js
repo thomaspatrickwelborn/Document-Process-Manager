@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { globSync } from 'glob'
-import Piler from './piler/index.js'
+import Piler from '../piler/index.js'
 import { rm } from 'node:fs'
 export default class ClearPiler extends Piler {
   #target

@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'url'
 import path from 'node:path'
-import Piler from './piler/index.js'
+import Piler from '../piler/index.js'
 import createDir from '../coutil/createDir/index.js'
 import beautify from 'js-beautify'
 import ejs from 'ejs'

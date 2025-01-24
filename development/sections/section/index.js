@@ -4,6 +4,13 @@ import path from 'node:path'
 import { rm, mkdir, readFile } from 'node:fs'
 import { globSync } from 'glob'
 import watch from 'glob-watcher'
+const PilerTypes = [
+  'sans',
+  'simules',
+  'styles',
+  'scripts',
+  'structs',
+]
 export default class Section extends EventTarget {
   #settings
   #sections
@@ -52,22 +59,17 @@ export default class Section extends EventTarget {
     return this.#pilers
   }
   async #addPilers() {
-    iteratePilers: 
-    for(const $pilerType of [
-      'sans',
-      'simules',
-      'styles',
-      'scripts',
-      'structs',
-    ]) {
+    await this.#depile()
+    iteratePilerTypes: 
+    for(const $pilerType of PilerTypes) {
       const pilers = []
       iteratePilerSettings: 
       for(const $piler of this.#settings.pilers[$pilerType]) {
         this.pilers[$pilerType] = this.pilers[$pilerType] || []
         const Piler = Pilers[$piler.name]
         const piler = new Piler($piler, this)
+        piler.active = true
         this.pilers[$pilerType].push(piler)
-        console.log(piler)
         if(piler.type === 'sans') {
           await piler.pile()
         }
@@ -76,12 +78,24 @@ export default class Section extends EventTarget {
     return this
   }
   async #removePilers() {
-    return await this.#depile()
+    iteratePilerTypes: 
+    for(const $pilerType of PilerTypes) {
+      const pilers = this.pilers[$pilerType]
+      let pilerIndex = 0
+      iteratePilers: 
+      for(const $piler of pilers) {
+        $piler.active = false
+        pilers.splice($pilerIndex, 1)
+        pilerIndex++
+      }
+    }
+    await this.#depile()
+    return this
   }
   async #depile() {
     if(this.#depiled) { return this } 
     iterateSansPilers: 
-    for(const $pilerInstance of this.pilers.sans) {
+    for(const $pilerInstance of this.pilers.sans || []) {
       await $pilerInstance.pile()
     }
     this.#depiled = true
