@@ -1,4 +1,3 @@
-import Route from './route/index.js'
 import * as Pilers from '../../pilers/index.js'
 import path from 'node:path'
 import { rm, mkdir, readFile } from 'node:fs'
@@ -11,19 +10,19 @@ const PilerTypes = [
   'scripts',
   'structs',
 ]
-export default class Section extends EventTarget {
+export default class Route extends EventTarget {
   #settings
-  #sections
+  #router
   #pilers
-  #active = false
   #source
   #target
   #ignore
+  #active = false
   #depiled = false
-  constructor($settings, $sections) {
+  constructor($settings, $router) {
     super()
     this.#settings = $settings
-    this.#sections = $sections
+    this.#router = $router
     this.active = this.#settings.active
   }
   get active() { return this.#active }
@@ -35,6 +34,7 @@ export default class Section extends EventTarget {
   }
   get name() { return this.#settings.name }
   get url() { return this.#settings.url }
+  get routePath() { return this.#settings.routePath }
   get source() {
     if(this.#source !== undefined) return this.#source
     this.#source = path.join(process.env.PWD, this.#settings.source)

@@ -4,22 +4,22 @@ import inspector from 'node:inspector'
 import https from 'node:https'
 import express from 'express'
 import browserSync from 'browser-sync'
-import Sections from './sections/index.js'
+import Router from './router/index.js'
 export default class DocumentProcessManager extends EventTarget {
   #settings
   #_inspector
   #_server
   #_https
   #_browserSync
-  #_sections
+  #_router
   constructor($settings) {
     super()
     this.#settings = $settings
     this.inspector
-    // this.server
-    // this.https
-    this.sections
-    // this.browserSync
+    this.server
+    this.https
+    this.router
+    this.browserSync
   }
   get name() { return this.#settings.name }
   // Node Inspector
@@ -32,18 +32,6 @@ export default class DocumentProcessManager extends EventTarget {
       this.#settings.inspector.host
     )
     return this.#_inspector
-  }
-  // Express
-  get server() {
-    if(this.#_server !== undefined) return this.#_server
-    this.#_server = express()
-    const router = {}
-    for(const $static of this.#settings.express.static) {
-      this.#_server.use(
-        express.static($static)
-      )
-    }
-    return this.#_server
   }
   // Node HTTPS Server
   get https() {
@@ -92,10 +80,10 @@ export default class DocumentProcessManager extends EventTarget {
     this.dispatchEvent(new CustomEvent('ready', { detail: this }))
     return this.#_browserSync
   }
-  // Sections
-  get sections() {
-    if(this.#_sections !== undefined) { return this.#_sections }
-    this.#_sections = new Sections(this.#settings.sections)
-    return this.#_sections
+  // Router
+  get router() {
+    if(this.#_router !== undefined) { return this.#_router }
+    this.#_router = new Router(this.#settings.router)
+    return this.#_router
   }
 }

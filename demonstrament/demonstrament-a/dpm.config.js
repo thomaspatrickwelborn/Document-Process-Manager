@@ -30,12 +30,14 @@ export default {
       'static'
     ]
   },
-  express: {
-    static: ['static', 'localhost']
-  },
-  sections: {
+  router: {
+    routeKey: '$route.js'
     source: 'sections',
     target: 'localhost',
-    key: '$route.js'
+    static: [
+      // $path, $options
+      ['static', {}], 
+      ['localhost', {}],
+    ],
   },
 }

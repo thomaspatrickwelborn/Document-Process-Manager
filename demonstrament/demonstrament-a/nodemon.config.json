@@ -6,7 +6,7 @@
     "package.json",
     "nodemon.config.json",
     "dpm.config.js",
-    "sections/**/\\$route.js",
+    "sections/**/$route.js",
     "../../development/**"
   ]
 }
