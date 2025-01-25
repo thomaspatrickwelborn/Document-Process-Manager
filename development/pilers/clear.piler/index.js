@@ -1,16 +1,16 @@
 import path from 'node:path'
 import { globSync } from 'glob'
-import Piler from '../piler/index.js'
+import Piler from '../../piler/index.js'
 import { rm } from 'node:fs'
 export default class ClearPiler extends Piler {
   #target
   #path
-  constructor($settings, $section) {
+  constructor() {
     super(...arguments)
   }
   get target() {
     if(this.#target !== undefined) { return this.#target }
-    this.#target = this.section[this.settings.target]
+    this.#target = this.route[this.settings.target]
     return this.#target
   }
   get path() {

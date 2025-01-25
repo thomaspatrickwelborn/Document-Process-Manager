@@ -1,8 +1,8 @@
-import ClearPiler from './clear.piler.js'
-import EJSPiler from './ejs.piler.js'
-import RollupPiler from './rollup.piler.js'
-import SASSPiler from './sass.piler.js'
-import SimulePiler from './simule.piler.js'
+import ClearPiler from './clear.piler/index.js'
+import EJSPiler from './ejs.piler/index.js'
+import RollupPiler from './rollup.piler/index.js'
+import SASSPiler from './sass.piler/index.js'
+import SimulePiler from './simule.piler/index.js'
 export {
   ClearPiler,
   EJSPiler,

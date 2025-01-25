@@ -2,7 +2,7 @@ import path from 'node:path'
 import watch from 'glob-watcher'
 export default class Piler extends EventTarget {
   settings
-  section
+  route
   #active = false
   #input
   #output
@@ -10,10 +10,10 @@ export default class Piler extends EventTarget {
   #ignore
   #watcher
   #_boundPile
-  constructor($settings, $section) {
+  constructor($settings, $route) {
     super()
     this.settings = $settings
-    this.section = $section
+    this.route = $route
   }
   get active() { return this.#active }
   set active($active) {
@@ -31,19 +31,19 @@ export default class Piler extends EventTarget {
   get type() { return this.settings.type }
   get input() {
     if(this.#input !== undefined) { return this.#input }
-    this.#input = path.join(this.section.source, this.settings.input)
+    this.#input = path.join(this.route.source, this.settings.input)
     return this.#input
   }
   get output() {
     if(this.#output !== undefined) { return this.#output }
-    this.#output = path.join(this.section.target, this.settings.output)
+    this.#output = path.join(this.route.target, this.settings.output)
     return this.#output
   }
   get watch() {
     if(this.#watch !== undefined) { return this.#watch }
     if(!this.settings.watch) { return this.#watch }
     const watch = this.settings.watch.map(
-      ($watchPath) => path.join(this.section.source, $watchPath)
+      ($watchPath) => path.join(this.route.source, $watchPath)
     )
     if(watch.length) { this.#watch = watch }
     return this.#watch
@@ -53,10 +53,10 @@ export default class Piler extends EventTarget {
     this.#ignore = Array.prototype.concat(
       // Settings - Ignore
       this.settings.ignore.map(
-        ($ignorePath) => path.join(this.section.source, $ignorePath)
+        ($ignorePath) => path.join(this.route.source, $ignorePath)
       ),
-      // Section - Ignore
-      this.section.ignore
+      // Route - Ignore
+      this.route.ignore
     )
     return this.#ignore
   }
