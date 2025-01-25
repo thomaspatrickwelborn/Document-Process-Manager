@@ -32,6 +32,7 @@ export default class SASSPiler extends Piler {
       const sassFileSourceMap =JSON.stringify(sassPile.sourceMap)
       await writeFile(sassFilePath, sassFileCSS)
       await writeFile(sassFileSourceMapPath, sassFileSourceMap)
+      return sassFileCSS
     }
     catch($err) { console.log($err) }
   }

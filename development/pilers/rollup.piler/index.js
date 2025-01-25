@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { stat, mkdir, writeFile } from 'node:fs/promises'
 import * as rollup from 'rollup'
 import Piler from '../../piler/index.js'
 import createDir from '../../coutil/createDir/index.js'
@@ -35,11 +36,12 @@ export default class RollupPiler extends Piler{
       const inputOptions = Object.assign({}, this.inputOptions, {
         input: this.input
       })
-      const outputOptions = Object.assign({}, this.outputOptions, {
-        file: this.output
-      })
+      const outputOptions = Object.assign({}, this.outputOptions, {})
       const rollupPile = await rollup.rollup(inputOptions)
-      await rollupPile.write(outputOptions)
+      const rollupPileOutput = await rollupPile.generate(outputOptions)
+      const rollupFile = rollupPileOutput.output[0].code
+      writeFile(this.output, rollupFile)
+      return rollupFile
     }
     catch($err) { console.log($err) }
   }

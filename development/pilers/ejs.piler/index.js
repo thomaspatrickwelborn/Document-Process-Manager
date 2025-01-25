@@ -1,12 +1,12 @@
 import { fileURLToPath } from 'url'
 import path from 'node:path'
+import { readFile, writeFile } from 'node:fs/promises'
+// import { writeFile } from 'node:fs'
+import beautify from 'js-beautify'
+import ejs from 'ejs'
 import Piler from '../../piler/index.js'
 import createDir from '../../coutil/createDir/index.js'
 import parseValidProperties from '../../coutil/parseValidProperties/index.js'
-import beautify from 'js-beautify'
-import ejs from 'ejs'
-import { readFile } from 'node:fs/promises'
-import { writeFile } from 'node:fs'
 import OutputOptions from './OutputOptions.js'
 export default class EJSPiler extends Piler {
   #model
@@ -29,12 +29,10 @@ export default class EJSPiler extends Piler {
       this.settings.outputOptions === undefined
     ) { return this.#renderFileOptions }
     this.#renderFileOptions = parseValidProperties(this.settings.outputOptions, OutputOptions)
-  this.#renderFileOptions.root = this.#renderFileOptions.root || []
     this.#renderFileOptions.root.unshift(
-      path.join(this.#root, '../../../templates')
+      path.join(process.env.PWD, 'templates')
     )
     this.#renderFileOptions.async = true
-    console.log(this)
     return this.#renderFileOptions
   }
   get compileOptions() {
@@ -43,12 +41,11 @@ export default class EJSPiler extends Piler {
       this.settings.outputOptions === undefined
     ) { return this.#compileOptions }
     this.#compileOptions = parseValidProperties(this.settings.outputOptions, OutputOptions)
-    this.#compileOptions.root = this.#compileOptions.root || []
+    this.#compileOptions = parseValidProperties(this.settings.outputOptions, OutputOptions)
     this.#compileOptions.root.unshift(
-      path.join(this.#root, '../../../templates')
+      path.join(process.env.PWD, 'templates')
     )
     this.#compileOptions.async = true
-    console.log(this)
     this.#compileOptions._with = false
     this.#compileOptions.compileDebug = false
     return this.#compileOptions
@@ -75,7 +72,7 @@ export default class EJSPiler extends Piler {
           indentChar: ' ',
         })
         const writeFilePath = this.output
-        writeFile(writeFilePath, viewPileBeautify, ($err) => console.log)
+        await writeFile(writeFilePath, viewPileBeautify)
       }
       catch($err) { console.log($err) }
     }
@@ -97,7 +94,7 @@ export default class EJSPiler extends Piler {
         const viewPilePath = $path
         .replace(new RegExp(/\$/), '')
         .replace(new RegExp(/.ejs$/), '.js')
-        writeFile(viewPilePath, viewPileBeautify, ($err) => console.log)
+        await writeFile(viewPilePath, viewPileBeautify)
       }
       catch($err) { console.log($err) }
     }

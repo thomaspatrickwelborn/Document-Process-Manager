@@ -8,16 +8,17 @@ import Router from './router/index.js'
 export default class DocumentProcessManager extends EventTarget {
   #settings
   #_inspector
-  #_server
   #_https
   #_browserSync
+  #_express
+  #_static
   #_router
   constructor($settings) {
     super()
     this.#settings = $settings
     this.inspector
-    this.server
     this.https
+    this.static
     this.router
     this.browserSync
   }
@@ -43,16 +44,19 @@ export default class DocumentProcessManager extends EventTarget {
         key: this.#settings.https.key,
         cert: this.#settings.https.cert,
       },
-      this.server
+      this.express
     )
     this.#_https.listen(
       this.#settings.https.port, 
       this.#settings.https.host,
-      ($request, $response) => {
-        // 
-      } 
+      ($request, $response) => { /**/ } 
     )
     return this.#_https
+  }
+  get express() {
+    if(this.#_express !== undefined) { return this.#_express }
+    this.#_express = express(this.#settings.express || {})
+    return this.#_express
   }
   // BrowserSync
   get browserSync() {
@@ -80,10 +84,25 @@ export default class DocumentProcessManager extends EventTarget {
     this.dispatchEvent(new CustomEvent('ready', { detail: this }))
     return this.#_browserSync
   }
+  get static() {
+    if(this.#_static !== undefined) { return this.#_static }
+    if(this.#settings.static !== undefined) {
+      const staticElements = []
+      for(const [$staticPath, $staticOptions] of this.#settings.static) {
+        const staticElement = express.static(path.join(process.env.PWD, $staticPath), $staticOptions)
+        this.express.use(staticElement)
+        staticElements.push(staticElement)
+      }
+      this.#_static = staticElements
+    }
+    return this.#_static
+  }
   // Router
   get router() {
     if(this.#_router !== undefined) { return this.#_router }
-    this.#_router = new Router(this.#settings.router)
+    if(this.#settings.router !== undefined) {
+      this.#_router = new Router(this.#settings.router, this)
+    }
     return this.#_router
   }
 }
