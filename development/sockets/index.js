@@ -1,32 +1,31 @@
 import path from 'node:path'
 import { rm, mkdir, readFile } from 'node:fs'
-import express from 'express'
 import { globSync } from 'glob'
 import watch from 'glob-watcher'
-import Route from './route/index.js'
-export default class Router extends EventTarget {
+import Socket from './socket/index.js'
+export default class Sockets extends EventTarget {
   length = 0
   #settings
   #dpm
-  #$
-  #static
   #source
   #target
-  #_watcher
-  #_boundAdd
-  #_boundChange
-  #_boundUnlink
+  #active = false
   constructor($settings, $dpm) {
     super()
     this.#settings = $settings
     this.#dpm = $dpm
-    this.static
     this.#watcher
   }
-  get $() {
-    if(this.#$ !== undefined) { return this.#$ }
-    this.#$ = express(this.#settings.router || {})
-    return this.#$
+  get active() { return this.#active }
+  set active($active) {
+    if(this.#active === $active) { return }
+    if($active === true) {
+      // 
+    }
+    else if($active === false) {
+      // 
+    }
+    this.#active = $active
   }
   get #config() { return this.#settings.config }
   get source() {
@@ -34,19 +33,10 @@ export default class Router extends EventTarget {
     this.#source = path.join(process.env.PWD, this.#settings.source)
     return this.#source
   }
-  get static() {
-    if(this.#static !== undefined) { return this.#static }
-    if(this.#settings.static !== undefined) {
-      const staticElements = []
-      for(const [$staticPath, $staticOptions] of this.#settings.static) {
-        const staticPath = path.join(process.env.PWD, $staticPath)
-        const staticElement = express.static(staticPath, $staticOptions)
-        this.$.use(staticElement)
-        staticElements.push([staticPath, staticElement])
-      }
-      this.#static = staticElements
-    }
-    return this.#static
+  get target() {
+    if(this.#settings.target !== undefined) return this.#settings.target
+    this.#target = path.join(process.env.PWD, this.#settings.target)
+    return this.#target
   }
   get #watcher() {
     if(this.#_watcher !== undefined) { return this.#_watcher }
@@ -80,8 +70,8 @@ export default class Router extends EventTarget {
     const routePath = path.join(process.env.PWD, $path)
     const routeImport = await import(routePath)
     .then(($routeImport) => $routeImport.default)
-    Array.prototype.push.call(
-      this, new Route(routeImport, this)
+    Array.prototype.push.call(this, new Route(
+      routeImport, this
     )
     return this
   }
@@ -91,8 +81,8 @@ export default class Router extends EventTarget {
     if($route) {
       const routeImport = await import(routePath)
       .then(($routeImport) => $routeImport.default)
-      Array.prototype.splice.call(
-        this, $routeIndex, 1, new Route(routeImport, this)
+      Array.prototype.splice.call(this, $routeIndex, 1, new Route(
+        routeImport, this
       )
     }
     return this
@@ -105,22 +95,5 @@ export default class Router extends EventTarget {
       Array.prototype.splice.call(this, $routeIndex, 1)
     }
     return this
-  }
-  getRoutes($filter) {
-    const routes = []
-    let routeIndex = 0
-    iterateRoutes: 
-    for(const $route of Array.from(this)) {
-      let match
-      iterateFilterKeys: 
-      for(const $filterKey of Object.keys($filter)) {
-        if(match !== false) {
-          match = $filter[$filterKey] === $route[$filterKey]
-        }
-      }
-      if(match) { routes.push([routeIndex, $route]) }
-      routeIndex++
-    }
-    return routes
   }
 }

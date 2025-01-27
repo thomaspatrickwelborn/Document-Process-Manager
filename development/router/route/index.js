@@ -1,22 +1,13 @@
-import * as Pilers from '../../pilers/index.js'
 import path from 'node:path'
-import { rm, mkdir, readFile } from 'node:fs'
-import { globSync } from 'glob'
-import watch from 'glob-watcher'
-const PilerTypes = [
-  'sans',
-  'simules',
-  'styles',
-  'scripts',
-  'structs',
-]
+import express from 'express'
 export default class Route extends EventTarget {
   #settings
   #router
-  #pilers
+  #$
   #source
-  #target
-  #ignore
+  // #target
+  #static
+  #methods
   #active = false
   #depiled = false
   constructor($settings, $router) {
@@ -24,81 +15,58 @@ export default class Route extends EventTarget {
     this.#settings = $settings
     this.#router = $router
     this.active = this.#settings.active
+    // this.$.stack = []
+    console.log(this.$)
+  }
+  get $() {
+    if(this.#$ !== undefined) { return this.#$ }
+    this.#$ = this.#router.$.route(this.path)
+    return this.#$
   }
   get active() { return this.#active }
   set active($active) {
     if(this.#active === $active) { return }
-    if($active === true) { this.#addPilers() }
-    else if($active === false) { this.#removePilers() }
+    if($active === true) {
+      this.static
+      this.methods
+    }
+    else if($active === false) {
+      this.#static = undefined
+      this.#methods = undefined
+    }
     this.#active = $active
   }
   get name() { return this.#settings.name }
-  get url() { return this.#settings.url }
-  get routePath() { return this.#settings.routePath }
+  get path() { return this.#settings.path }
   get source() {
     if(this.#source !== undefined) return this.#source
     this.#source = path.join(process.env.PWD, this.#settings.source)
     return this.#source
   }
-  get target() {
-    if(this.#target !== undefined) return this.#target
-    this.#target = path.join(process.env.PWD, this.#settings.target)
-    return this.#target
-  }
-  get main() { return this.#settings.main }
-  get ignore() {
-    if(this.#ignore !== undefined) { return this.#ignore }
-    this.#ignore = this.#settings.ignore.map(
-      ($ignorePath) => path.join(this.source, $ignorePath)
-    )
-    return this.#ignore
-  }
-  get pilers() {
-    if(this.#pilers !== undefined) { return this.#pilers }
-    this.#pilers = {}
-    return this.#pilers
-  }
-  async #addPilers() {
-    await this.#depile()
-    iteratePilerTypes: 
-    for(const $pilerType of PilerTypes) {
-      const pilers = []
-      iteratePilerSettings: 
-      for(const $piler of this.#settings.pilers[$pilerType]) {
-        this.pilers[$pilerType] = this.pilers[$pilerType] || []
-        const Piler = Pilers[$piler.name]
-        const piler = new Piler($piler, this)
-        piler.active = true
-        this.pilers[$pilerType].push(piler)
-        if(piler.type === 'sans') {
-          await piler.pile()
-        }
+  get static() {
+    if(this.#static !== undefined) { return this.#static }
+    if(this.#settings.static !== undefined) {
+      const staticElements = []
+      for(const [$staticPath, $staticOptions] of this.#settings.static) {
+        const staticPath = path.join(process.env.PWD, $staticPath)
+        const staticElement = express.static(staticPath, $staticOptions)
+        this.#$.use(staticElement)
+        staticElements.push([staticPath, staticElement])
       }
+      this.#static = staticElements
     }
-    return this
+    return this.#static
   }
-  async #removePilers() {
-    iteratePilerTypes: 
-    for(const $pilerType of PilerTypes) {
-      const pilers = this.pilers[$pilerType]
-      let pilerIndex = 0
-      iteratePilers: 
-      for(const $piler of pilers) {
-        $piler.active = false
-        pilers.splice($pilerIndex, 1)
-        pilerIndex++
+  get methods() {
+    if(this.#methods !== undefined) { return this.#methods }
+    if(this.#settings.methods !== undefined) {
+      const methods = []
+      for(const [$methodName, $method] of this.#settings.methods) {
+        const method = this.$[$methodName]($method)
+        methods.push(method)
       }
+      this.#methods = methods
     }
-    await this.#depile()
-    return this
-  }
-  async #depile() {
-    if(this.#depiled) { return this } 
-    iterateSansPilers: 
-    for(const $pilerInstance of this.pilers.sans || []) {
-      await $pilerInstance.pile()
-    }
-    this.#depiled = true
-    return this
+    return this.#methods
   }
 }

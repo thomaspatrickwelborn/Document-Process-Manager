@@ -1,14 +1,12 @@
 import path from 'node:path'
 import { rm, mkdir, readFile } from 'node:fs'
-import express from 'express'
 import { globSync } from 'glob'
 import watch from 'glob-watcher'
-import Route from './route/index.js'
-export default class Router extends EventTarget {
+import DPMDocument from './document/index.js'
+export default class Documents extends EventTarget {
   length = 0
   #settings
   #dpm
-  #$
   #static
   #source
   #target
@@ -23,30 +21,16 @@ export default class Router extends EventTarget {
     this.static
     this.#watcher
   }
-  get $() {
-    if(this.#$ !== undefined) { return this.#$ }
-    this.#$ = express(this.#settings.router || {})
-    return this.#$
-  }
   get #config() { return this.#settings.config }
   get source() {
     if(this.#settings.source !== undefined) return this.#settings.source
     this.#source = path.join(process.env.PWD, this.#settings.source)
     return this.#source
   }
-  get static() {
-    if(this.#static !== undefined) { return this.#static }
-    if(this.#settings.static !== undefined) {
-      const staticElements = []
-      for(const [$staticPath, $staticOptions] of this.#settings.static) {
-        const staticPath = path.join(process.env.PWD, $staticPath)
-        const staticElement = express.static(staticPath, $staticOptions)
-        this.$.use(staticElement)
-        staticElements.push([staticPath, staticElement])
-      }
-      this.#static = staticElements
-    }
-    return this.#static
+  get target() {
+    if(this.#settings.target !== undefined) return this.#settings.target
+    this.#target = path.join(process.env.PWD, this.#settings.target)
+    return this.#target
   }
   get #watcher() {
     if(this.#_watcher !== undefined) { return this.#_watcher }
@@ -77,50 +61,50 @@ export default class Router extends EventTarget {
     return this.#_boundUnlink
   }
   async #add($path) {
-    const routePath = path.join(process.env.PWD, $path)
-    const routeImport = await import(routePath)
-    .then(($routeImport) => $routeImport.default)
-    Array.prototype.push.call(
-      this, new Route(routeImport, this)
+    const addPath = path.join(process.env.PWD, $path)
+    const documentImport = await import(addPath)
+    .then(($documentImport) => $documentImport.default)
+    Array.prototype.push.call(this, new DPMDocument(
+      Object.assign(documentImport, { path: addPath }))
     )
     return this
   }
   async #change($path) {
-    const routePath = path.join(process.env.PWD, $path)
-    const [$routeIndex, $route] = this.getRoutes({ routePath })[0]
-    if($route) {
-      const routeImport = await import(routePath)
-      .then(($routeImport) => $routeImport.default)
-      Array.prototype.splice.call(
-        this, $routeIndex, 1, new Route(routeImport, this)
+    const changePath = path.join(process.env.PWD, $path)
+    const [$documentIndex, $document] = this.getDocuments({ path: changePath })[0]
+    if($document) {
+      const documentImport = await import(changePath)
+      .then(($documentImport) => $documentImport.default)
+      Array.prototype.splice.call(this, $documentIndex, 1, new DPMDocument(
+        Object.assign(documentImport, { path: changePath }))
       )
     }
     return this
   }
   async #unlink($path) {
-    const routePath = path.join(process.env.PWD, $path)
-    const [$routeIndex, $route] = this.getRoutes({ routePath })[0]
-    if($route) {
-      $route.active = false
-      Array.prototype.splice.call(this, $routeIndex, 1)
+    const unlinkPath = path.join(process.env.PWD, $path)
+    const [$documentIndex, $document] = this.getDocuments({ path: unlinkPath })[0]
+    if($document) {
+      $document.active = false
+      Array.prototype.splice.call(this, $documentIndex, 1)
     }
     return this
   }
-  getRoutes($filter) {
-    const routes = []
-    let routeIndex = 0
-    iterateRoutes: 
-    for(const $route of Array.from(this)) {
+  getDocuments($filter) {
+    const documents = []
+    let documentIndex = 0
+    iterateDPMDocuments: 
+    for(const $document of Array.from(this)) {
       let match
       iterateFilterKeys: 
       for(const $filterKey of Object.keys($filter)) {
         if(match !== false) {
-          match = $filter[$filterKey] === $route[$filterKey]
+          match = $filter[$filterKey] === $document[$filterKey]
         }
       }
-      if(match) { routes.push([routeIndex, $route]) }
-      routeIndex++
+      if(match) { documents.push([documentIndex, $document]) }
+      documentIndex++
     }
-    return routes
+    return documents
   }
 }
