@@ -8,7 +8,7 @@ export default class Router extends EventTarget {
   length = 0
   #settings
   #dpm
-  #$
+  #expressRouter
   #static
   #source
   #target
@@ -23,10 +23,10 @@ export default class Router extends EventTarget {
     this.static
     this.#watcher
   }
-  get $() {
-    if(this.#$ !== undefined) { return this.#$ }
-    this.#$ = express(this.#settings.router || {})
-    return this.#$
+  get expressRouter() {
+    if(this.#expressRouter !== undefined) { return this.#expressRouter }
+    this.#expressRouter = express(this.#settings.router || {})
+    return this.#expressRouter
   }
   get #config() { return this.#settings.config }
   get source() {
@@ -41,7 +41,7 @@ export default class Router extends EventTarget {
       for(const [$staticPath, $staticOptions] of this.#settings.static) {
         const staticPath = path.join(process.env.PWD, $staticPath)
         const staticElement = express.static(staticPath, $staticOptions)
-        this.$.use(staticElement)
+        this.expressRouter.use(staticElement)
         staticElements.push([staticPath, staticElement])
       }
       this.#static = staticElements
@@ -57,7 +57,7 @@ export default class Router extends EventTarget {
     })
     watcher.on('add', this.#boundAdd)
     watcher.on('change', this.#boundChange)
-    watcher.on('unlink', this.#boundUnlink)
+    // watcher.on('unlink', this.#boundUnlink)
     this.#_watcher = watcher
     return this.#_watcher
   }
@@ -81,25 +81,29 @@ export default class Router extends EventTarget {
     const routeImport = await import(routePath)
     .then(($routeImport) => $routeImport.default)
     Array.prototype.push.call(
-      this, new Route(routeImport, this)
+      this, new Route(Object.assign(routeImport, {
+        fileReference: routePath
+      }), this)
     )
     return this
   }
   async #change($path) {
-    const routePath = path.join(process.env.PWD, $path)
-    const [$routeIndex, $route] = this.getRoutes({ routePath })[0]
+    const routePath = path.join(process.env.PWD, $path).concat('?', Date.now())
+    const routeImport = await import(routePath)
+    .then(($routeImport) => $routeImport.default)
+    const [$routeIndex, $route] = this.getRoutes({ path: routeImport.path })[0]
     if($route) {
-      const routeImport = await import(routePath)
-      .then(($routeImport) => $routeImport.default)
       Array.prototype.splice.call(
-        this, $routeIndex, 1, new Route(routeImport, this)
+        this, $routeIndex, 1, new Route(Object.assign(routeImport, {
+          fileReference: routePath
+        }), this)
       )
     }
     return this
   }
   async #unlink($path) {
     const routePath = path.join(process.env.PWD, $path)
-    const [$routeIndex, $route] = this.getRoutes({ routePath })[0]
+    const [$routeIndex, $route] = this.getRoutes({ fileReference: routePath })[0]
     if($route) {
       $route.active = false
       Array.prototype.splice.call(this, $routeIndex, 1)

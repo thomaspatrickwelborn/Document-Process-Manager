@@ -7,25 +7,26 @@ export default class Sockets extends EventTarget {
   length = 0
   #settings
   #dpm
+  #base
   #source
   #target
-  #active = false
+  #_watcher
+  #_boundAdd
+  #_boundChange
+  #_boundUnlink
   constructor($settings, $dpm) {
     super()
     this.#settings = $settings
     this.#dpm = $dpm
     this.#watcher
   }
-  get active() { return this.#active }
-  set active($active) {
-    if(this.#active === $active) { return }
-    if($active === true) {
-      // 
+  get server() { return this.#dpm.server }
+  get base() {
+    const { protocol, host, port } = this.#settings
+    if(protocol && host && port) {
+      this.#base = [protocol, '//', host, ':', port].join('')
     }
-    else if($active === false) {
-      // 
-    }
-    this.#active = $active
+    return this.#base
   }
   get #config() { return this.#settings.config }
   get source() {
@@ -67,33 +68,54 @@ export default class Sockets extends EventTarget {
     return this.#_boundUnlink
   }
   async #add($path) {
-    const routePath = path.join(process.env.PWD, $path)
-    const routeImport = await import(routePath)
-    .then(($routeImport) => $routeImport.default)
-    Array.prototype.push.call(this, new Route(
-      routeImport, this
-    )
+    const socketPath = path.join(process.env.PWD, $path)
+    const socketImport = await import(socketPath)
+    .then(($socketImport) => $socketImport.default)
+    Array.prototype.push.call(this, new Socket(
+      Object.assign(socketImport, {
+        fileReference: socketPath
+      }), this
+    ))
     return this
   }
   async #change($path) {
-    const routePath = path.join(process.env.PWD, $path)
-    const [$routeIndex, $route] = this.getRoutes({ routePath })[0]
-    if($route) {
-      const routeImport = await import(routePath)
-      .then(($routeImport) => $routeImport.default)
-      Array.prototype.splice.call(this, $routeIndex, 1, new Route(
-        routeImport, this
-      )
-    }
+    const socketPath = path.join(process.env.PWD, $path).concat('?', Date.now())
+    const socketImport = await import(socketPath)
+    .then(($socketImport) => $socketImport.default)
+    const [$socketIndex, $socket] = this.getSockets({ path: socketImport.path })[0]
+    $socket.active = false
+    delete this[$socketIndex]
+    const splicedSockets = Array.prototype.splice.call(this, $socketIndex, 1, new Socket(
+      Object.assign(socketImport, {
+        fileReference: socketPath
+      }), this
+    ))
     return this
   }
   async #unlink($path) {
-    const routePath = path.join(process.env.PWD, $path)
-    const [$routeIndex, $route] = this.getRoutes({ routePath })[0]
-    if($route) {
-      $route.active = false
-      Array.prototype.splice.call(this, $routeIndex, 1)
+    const socketPath = path.join(process.env.PWD, $path)
+    const [$socketIndex, $socket] = this.getSockets({ fileReference: socketPath })[0]
+    if($socket) {
+      $socket.active = false
+      Array.prototype.splice.call(this, $socketIndex, 1)
     }
     return this
+  }
+  getSockets($filter) {
+    const sockets = []
+    let socketIndex = 0
+    iterateSockets: 
+    for(const $socket of Array.from(this)) {
+      let match
+      iterateFilterKeys: 
+      for(const $filterKey of Object.keys($filter)) {
+        if(match !== false) {
+          match = $filter[$filterKey] === $socket[$filterKey]
+        }
+      }
+      if(match) { sockets.push([socketIndex, $socket]) }
+      socketIndex++
+    }
+    return sockets
   }
 }

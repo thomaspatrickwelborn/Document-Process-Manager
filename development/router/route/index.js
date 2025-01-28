@@ -3,7 +3,7 @@ import express from 'express'
 export default class Route extends EventTarget {
   #settings
   #router
-  #$
+  #expressRoute
   #source
   // #target
   #static
@@ -15,13 +15,11 @@ export default class Route extends EventTarget {
     this.#settings = $settings
     this.#router = $router
     this.active = this.#settings.active
-    // this.$.stack = []
-    console.log(this.$)
   }
-  get $() {
-    if(this.#$ !== undefined) { return this.#$ }
-    this.#$ = this.#router.$.route(this.path)
-    return this.#$
+  get expressRoute() {
+    if(this.#expressRoute !== undefined) { return this.#expressRoute }
+    this.#expressRoute = this.#router.expressRouter.route(this.path)
+    return this.#expressRoute
   }
   get active() { return this.#active }
   set active($active) {
@@ -31,6 +29,7 @@ export default class Route extends EventTarget {
       this.methods
     }
     else if($active === false) {
+      this.expressRoute.stack = []
       this.#static = undefined
       this.#methods = undefined
     }
@@ -50,7 +49,7 @@ export default class Route extends EventTarget {
       for(const [$staticPath, $staticOptions] of this.#settings.static) {
         const staticPath = path.join(process.env.PWD, $staticPath)
         const staticElement = express.static(staticPath, $staticOptions)
-        this.#$.use(staticElement)
+        this.#expressRoute.use(staticElement)
         staticElements.push([staticPath, staticElement])
       }
       this.#static = staticElements
@@ -62,11 +61,12 @@ export default class Route extends EventTarget {
     if(this.#settings.methods !== undefined) {
       const methods = []
       for(const [$methodName, $method] of this.#settings.methods) {
-        const method = this.$[$methodName]($method)
+        const method = this.expressRoute[$methodName]($method)
         methods.push(method)
       }
       this.#methods = methods
     }
     return this.#methods
   }
+  
 }

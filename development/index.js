@@ -3,15 +3,17 @@ import path from 'node:path'
 import inspector from 'node:inspector'
 import http from 'node:http'
 import https from 'node:https'
+import express from 'express'
 import browserSync from 'browser-sync'
 import { WebSocketServer } from 'ws'
 import Router from './router/index.js'
-import Sockets from './router/index.js'
+import Sockets from './sockets/index.js'
 import Documents from './documents/index.js'
 export default class DocumentProcessManager extends EventTarget {
   #settings
   #inspector
   #server
+  #express
   #browserSync
   #router
   #sockets
@@ -38,19 +40,20 @@ export default class DocumentProcessManager extends EventTarget {
   // Node Server
   get server() {
     if(this.#server !== undefined) { return this.#server }
+    if(this.#settings.server === undefined) return
     if(this.#settings.server.https) {
       // Node HTTPS Server
       this.#server = https.createServer(
         this.#settings.server.https,
-        this.router.express
+        this.router.expressRouter
       )
       this.#server.listen(
         this.#settings.server.https.port, 
         this.#settings.server.https.host,
-        ($request, $response) => { /**/ } 
+        ($request, $response) => {}
       )
     }
-    else if(this.server.http) {
+    else if(this.#settings.server.http) {
       // Node HTTPS Server
       this.#server = http.createServer(
         this.#settings.server.http,
@@ -59,7 +62,7 @@ export default class DocumentProcessManager extends EventTarget {
       this.#server.listen(
         this.#settings.server.http.port, 
         this.#settings.server.http.host,
-        ($request, $response) => { /**/ } 
+        ($request, $response) => {}
       )
     }
     return this.#server
@@ -67,14 +70,13 @@ export default class DocumentProcessManager extends EventTarget {
   // Router
   get router() {
     if(this.#router !== undefined) { return this.#router }
-    if(this.#settings.router !== undefined) {
-      this.#router = new Router(this.#settings.router, this)
-    }
+    this.#router = new Router(this.#settings.router || {}, this)
     return this.#router
   }
   // Sockets
   get sockets() {
     if(this.#sockets !== undefined) { return this.#sockets }
+    if(this.server === undefined) { return undefined }
     if(this.#settings.sockets !== undefined) {
       this.#sockets = new Sockets(this.#settings.sockets, this)
     }
@@ -91,6 +93,7 @@ export default class DocumentProcessManager extends EventTarget {
   // BrowserSync
   get browserSync() {
     if(this.#browserSync !== undefined) { return this.#browserSync }
+    if(this.#settings.browserSync === undefined) return
     const browserSyncServerOptions = {
       ui: false, 
       open: false, 
@@ -104,7 +107,7 @@ export default class DocumentProcessManager extends EventTarget {
           this.#settings.server.https.host, ":",
           this.#settings.server.https.port,
         ].join(''),
-        ws: false,
+        ws: this.#settings.browserSync.proxy.ws,
       },
     }
     this.#browserSync = browserSync.create()

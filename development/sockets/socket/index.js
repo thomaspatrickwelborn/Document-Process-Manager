@@ -1,90 +1,115 @@
-import WebSocket from 'ws'
+import { URL } from 'node:url'
+import { Buffer } from 'node:buffer'
+import WebSocket, { WebSocketServer } from 'ws'
+import MessageAdapter from './messageAdapter/index.js'
 export default class Socket extends EventTarget {
   #settings
   #sockets
-  #$
+  #webSocketServer
+  #webSocket
   #active = false
-  #messages
+  #messageAdapters
+  #url
   #_boundConnection
-  #_boundOpen
-  #_boundClose
-  #_boundError
-  #_boundMessage
+  #boundOpen
+  #boundClose
+  #boundError
+  #boundMessage
   constructor($settings, $sockets) {
     super()
     this.#settings = $settings
-    this.#sockets = $sokcets
+    this.#sockets = $sockets
     this.active = this.#settings.active
+    this.#boundOpen = this.#open.bind(this)
+    this.#boundClose = this.#close.bind(this)
+    this.#boundError = this.#error.bind(this)
+    this.#boundMessage = this.#message.bind(this)
   }
   get active() { return this.#active }
   set active($active) {
     if(this.#active === $active) { return }
     if($active === true) {
-      this.$
+      this.webSocketServer
     }
     else if($active === false) {
-      this.$.terminate()
+      this.webSocketServer.close()
+      this.#webSocketServer = undefined 
+      this.#webSocket = undefined
     }
     this.#active = $active
   }
-  get $() {
-    if(this.#$ !== undefined) { return this.#$ }
-    this.#$ = new WebSocket(this.path)
-    this.#$.on('connection', this.#boundConnection)
-    return this.#$
-  }
+  get fileReference() { return this.#settings.fileReference }
   get path() { return this.#settings.path }
+  get url() {
+    if(this.#url !== undefined) { return this.#url }
+    let { protocol, host, port } = this.#settings
+    let base
+    if(protocol && host && port) {
+      base = [protocol, '//', host, ':', port].join('')
+    }
+    else {
+      base = this.sockets.base
+    }
+    this.#url = new URL(this.path, base)
+    return this.#url
+  }
+  get webSocketServer() {
+    if(this.#webSocketServer !== undefined) { return this.#webSocketServer }
+    this.#webSocketServer = new WebSocketServer({
+      path: this.url.pathname,
+      server: this.#sockets.server,
+    })
+    this.#webSocketServer.on('connection', this.#boundConnection)
+    return this.#webSocketServer
+  }
+  get webSocket() { return this.#webSocket }
+  set webSocket($webSocket) {
+    if(this.#webSocket !== undefined) return
+    this.#webSocket = $webSocket
+    this.#webSocket.on('open', this.#boundOpen)
+    this.#webSocket.on('close', this.#boundClose)
+    this.#webSocket.on('error', this.#boundError)
+    this.#webSocket.on('message', this.#boundMessage)
+  }
   get #boundConnection() {
     if(this.#_boundConnection !== undefined) { return this.#_boundConnection }
     this.#_boundConnection = this.#connection.bind(this)
     return this.#_boundConnection
   }
-  get #boundOpen() {
-    if(this.#_boundOpen !== undefined) { return this.#_boundOpen }
-    this.#_boundOpen = this.#open.bind(this)
-    return this.#_boundOpen
-  }
-  get #boundClose() {
-    if(this.#_boundClose !== undefined) { return this.#_boundClose }
-    this.#_boundClose = this.#close.bind(this)
-    return this.#_boundClose
-  }
-  get #boundError() {
-    if(this.#_boundError !== undefined) { return this.#_boundError }
-    this.#_boundError = this.#error.bind(this)
-    return this.#_boundError
-  } 
-  get #boundMessage() {
-    if(this.#_boundMessage !== undefined) { return this.#_boundMessage }
-    this.#_boundMessage = this.#message.bind(this)
-    return this.#_boundMessage
-  }
   #connection($ws) {
-    $ws.on('open', this.#boundOpen)
-    $ws.on('close', this.#boundClose)
-    $ws.on('error', this.#boundError)
-    $ws.on('message', this.#boundMessage)
-    this.#$.off('open')
+    this.webSocket = $ws
   }
-  #open($event) {}
-  #close($event) {}
-  #error() { console.error(...arguments) }
-  #message($event, $isBinary) {
-    const { data } = $event
-    const { type } = data
-    const messages = Object.fromEntries(this.messages)
-    const message = messages[type]
-    message(data)
+  #open($event) {
+    console.log("#open", $event)
+  } 
+  #close($event) {
+    console.log("#close", $event)
   }
-  get messages() {
-    if(this.#messages !== undefined) { return this.#messages }
-    if(this.#settings.messages !== undefined) {
-      const messages = []
-      for(const [$messageName, $messageMethod] of this.#settings.messages) {
-        messages.push([$messageName, $messageMethod.bind(this)])
+  #error() {
+    console.error("#error", ...arguments)
+  }
+  #message($data, $isBinary) {
+    iterateAdapters: 
+    for(const [
+      $messageAdapterName, $messageAdapter
+    ] of this.messageAdapters) {
+      try {
+        const message = $messageAdapter.message($data, $isBinary)
+        console.log("message", message(this.webSocket, $data, $isBinary))
+        // console.log("message", message(this.webSocket, $data, $isBinary))
+        
       }
-      this.#messages = messages
+      catch($err) { /* console.log($err) */ }
     }
-    return this.#messages
+  }
+  get messageAdapters() {
+    if(this.#messageAdapters !== undefined) { return this.#messageAdapters }
+    const messageAdapters = []
+    for(const [$adapterName, $adapter] of this.#settings.messageAdapters) {
+      const adapter = new MessageAdapter($adapter, this)
+      messageAdapters.push([$adapterName, adapter])
+    }
+    this.#messageAdapters = messageAdapters
+    return this.#messageAdapters
   }
 }

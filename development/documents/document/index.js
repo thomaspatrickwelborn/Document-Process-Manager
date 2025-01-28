@@ -33,6 +33,7 @@ export default class DPMDocument extends EventTarget {
     this.#active = $active
   }
   get name() { return this.#settings.name }
+  get fileReference() { return this.#settings.fileReference }
   get path() { return this.#settings.path }
   get source() {
     if(this.#source !== undefined) return this.#source
@@ -80,12 +81,14 @@ export default class DPMDocument extends EventTarget {
     iteratePilerTypes: 
     for(const $pilerType of PilerTypes) {
       const pilers = this.pilers[$pilerType]
-      let pilerIndex = 0
-      iteratePilers: 
-      for(const $piler of pilers) {
-        $piler.active = false
-        pilers.splice($pilerIndex, 1)
-        pilerIndex++
+      if(pilers && pilers.length) {
+        let pilerIndex = 0
+        iteratePilers: 
+        for(const $piler of pilers) {
+          $piler.active = false
+          pilers.splice(pilerIndex, 1)
+          pilerIndex++
+        }
       }
     }
     await this.#depile()

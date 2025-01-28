@@ -64,26 +64,29 @@ export default class Documents extends EventTarget {
     const addPath = path.join(process.env.PWD, $path)
     const documentImport = await import(addPath)
     .then(($documentImport) => $documentImport.default)
-    Array.prototype.push.call(this, new DPMDocument(
-      Object.assign(documentImport, { path: addPath }))
-    )
+    Array.prototype.push.call(this, new DPMDocument(Object.assign(
+      documentImport, { fileReference: addPath }
+    )))
     return this
   }
   async #change($path) {
-    const changePath = path.join(process.env.PWD, $path)
-    const [$documentIndex, $document] = this.getDocuments({ path: changePath })[0]
-    if($document) {
-      const documentImport = await import(changePath)
-      .then(($documentImport) => $documentImport.default)
-      Array.prototype.splice.call(this, $documentIndex, 1, new DPMDocument(
-        Object.assign(documentImport, { path: changePath }))
-      )
+    const changePath = path.join(process.env.PWD, $path).concat('?', Date.now())
+    const documentImport = await import(changePath)
+    .then(($documentImport) => $documentImport.default)
+    const preterDocument = this.getDocuments({ path: documentImport.path })
+    if(preterDocument.length) {
+      const [$documentIndex, $document] = preterDocument[0]
+      $document.active = false
+      const anterDocument = new DPMDocument(Object.assign(
+        documentImport, { fileReference: changePath }
+      ))
+      Array.prototype.splice.call(this, $documentIndex, 1, anterDocument)
     }
     return this
   }
   async #unlink($path) {
     const unlinkPath = path.join(process.env.PWD, $path)
-    const [$documentIndex, $document] = this.getDocuments({ path: unlinkPath })[0]
+    const [$documentIndex, $document] = this.getDocuments({ fileReference: unlinkPath })[0]
     if($document) {
       $document.active = false
       Array.prototype.splice.call(this, $documentIndex, 1)
