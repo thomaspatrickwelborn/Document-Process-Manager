@@ -79,15 +79,9 @@ export default class Socket extends EventTarget {
   #connection($ws) {
     this.webSocket = $ws
   }
-  #open($event) {
-    console.log("#open", $event)
-  } 
-  #close($event) {
-    console.log("#close", $event)
-  }
-  #error() {
-    console.error("#error", ...arguments)
-  }
+  #open($event) { console.log("#open", $event) }
+  #close($event) { console.log("#close", $event) }
+  #error() { console.error("#error", ...arguments) }
   #message($data, $isBinary) {
     iterateAdapters: 
     for(const [
@@ -95,9 +89,7 @@ export default class Socket extends EventTarget {
     ] of this.messageAdapters) {
       try {
         const message = $messageAdapter.message($data, $isBinary)
-        console.log("message", message(this.webSocket, $data, $isBinary))
-        // console.log("message", message(this.webSocket, $data, $isBinary))
-        
+        return message(this.webSocket, $data, $isBinary)
       }
       catch($err) { /* console.log($err) */ }
     }

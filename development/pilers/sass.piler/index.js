@@ -2,7 +2,7 @@ import path from 'node:path'
 import { stat, mkdir, writeFile } from 'node:fs/promises'
 import * as sass from 'sass'
 import createDir from '../../coutil/createDir/index.js'
-import Piler from '../../piler/index.js'
+import Piler from '../../piler/ad/index.js'
 import OutputOptions from './OutputOptions.js'
 export default class SASSPiler extends Piler {
   constructor() {

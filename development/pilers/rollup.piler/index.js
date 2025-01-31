@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { stat, mkdir, writeFile } from 'node:fs/promises'
 import * as rollup from 'rollup'
-import Piler from '../../piler/index.js'
+import Piler from '../../piler/ad/index.js'
 import createDir from '../../coutil/createDir/index.js'
 import parseValidProperties from '../../coutil/parseValidProperties/index.js'
 import InputOptions from './InputOptions.js'

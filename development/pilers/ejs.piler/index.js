@@ -1,10 +1,9 @@
 import { fileURLToPath } from 'url'
 import path from 'node:path'
 import { readFile, writeFile } from 'node:fs/promises'
-// import { writeFile } from 'node:fs'
 import beautify from 'js-beautify'
 import ejs from 'ejs'
-import Piler from '../../piler/index.js'
+import Piler from '../../piler/ad/index.js'
 import createDir from '../../coutil/createDir/index.js'
 import parseValidProperties from '../../coutil/parseValidProperties/index.js'
 import OutputOptions from './OutputOptions.js'
@@ -20,7 +19,7 @@ export default class EJSPiler extends Piler {
   get outputType() { return this.settings.outputType }
   get model() {
     if(this.#model !== undefined) { return this.#model }
-    this.#model = path.join(this.route.source, this.settings.model)
+    this.#model = path.join(this.document.source, this.settings.model)
     return this.#model
   }
   get renderFileOptions() {
@@ -57,7 +56,6 @@ export default class EJSPiler extends Piler {
   }
   async pile($path) {
     const settings = this.settings
-    const route = this.route
     await createDir(path.dirname($path))
     let viewPileBeautify
     // Server

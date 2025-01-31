@@ -1,16 +1,17 @@
 import path from 'node:path'
 import { globSync } from 'glob'
-import Piler from '../../piler/index.js'
-import { rm } from 'node:fs'
+import Piler from '../../piler/dead/index.js'
+import { rm, rmdir, readdir } from 'node:fs/promises'
 export default class ClearPiler extends Piler {
   #target
   #path
+  #ignore
   constructor() {
     super(...arguments)
   }
   get target() {
     if(this.#target !== undefined) { return this.#target }
-    this.#target = this.route[this.settings.target]
+    this.#target = this.document[this.settings.target]
     return this.#target
   }
   get path() {
@@ -20,25 +21,37 @@ export default class ClearPiler extends Piler {
     )
     return this.#path
   }
-  async pile() {
-    const clear = []
+  get ignore() {
+    if(this.#ignore !== undefined) { return this.#ignore }
+    this.#ignore = Array.prototype.concat(
+      // Settings - Ignore
+      this.settings.ignore.map(
+        ($ignorePath) => path.join(this.target, $ignorePath)
+      ),
+      // Route - Ignore
+      this.document.ignore
+    )
+    return this.#ignore
+  }
+  get #depilePaths() {
     const depilePaths = globSync(this.path, {
       ignore: this.ignore
     })
+    return depilePaths
+  }
+  async pile() {
+    let depile = []
+    const depilePaths = this.#depilePaths
+    const depilePathDirectories = []
+    iterateDepilePaths: 
     for(const $depilePath of depilePaths) {
-      clear.push(
-        new Promise(($resolve, $reject) => {
-          rm($depilePath, {
-            recursive: true,
-            force: true,
-          }, ($err) => {
-            if($err) { $reject($err) }
-            else { $resolve(true) }
-          })
-          $resolve(true)
-        })
-      )
+      const depilePathDirectory = path.dirname($depilePath)
+      if(depilePathDirectories.includes(depilePathDirectory) === false) {
+        depilePathDirectories.push(depilePathDirectory)
+      }
+      const removeFile = await rm($depilePath, { force: true })
+      depile = depile.concat(depile)
     }
-    return Promise.all(clear)
+    return depile
   }
 }

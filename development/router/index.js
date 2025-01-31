@@ -57,7 +57,7 @@ export default class Router extends EventTarget {
     })
     watcher.on('add', this.#boundAdd)
     watcher.on('change', this.#boundChange)
-    // watcher.on('unlink', this.#boundUnlink)
+    watcher.on('unlink', this.#boundUnlink)
     this.#_watcher = watcher
     return this.#_watcher
   }
@@ -93,6 +93,7 @@ export default class Router extends EventTarget {
     .then(($routeImport) => $routeImport.default)
     const [$routeIndex, $route] = this.getRoutes({ path: routeImport.path })[0]
     if($route) {
+      $route.active = false
       Array.prototype.splice.call(
         this, $routeIndex, 1, new Route(Object.assign(routeImport, {
           fileReference: routePath

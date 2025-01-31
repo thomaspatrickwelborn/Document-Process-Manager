@@ -1,8 +1,6 @@
 import * as Pilers from '../../pilers/index.js'
 import path from 'node:path'
-import { rm, mkdir, readFile } from 'node:fs'
-import { globSync } from 'glob'
-import watch from 'glob-watcher'
+import { rm } from 'node:fs/promises'
 const PilerTypes = [
   'sans',
   'simules',
@@ -18,19 +16,30 @@ export default class DPMDocument extends EventTarget {
   #target
   #ignore
   #active = false
-  #depiled = false
   constructor($settings, $documents) {
     super()
     this.#settings = $settings
     this.#documents = $documents
-    this.active = this.#settings.active
+    this.#depile().then(($depile) => {
+      this.active = this.#settings.active
+    })
   }
   get active() { return this.#active }
   set active($active) {
-    if(this.#active === $active) { return }
-    if($active === true) { this.#addPilers() }
-    else if($active === false) { this.#removePilers() }
-    this.#active = $active
+    let { promise, resolve, reject } = Promise.withResolvers()
+    if($active === true) {
+      this.#addPilers().then(() => {
+        resolve($active)
+        this.#active = $active
+      })
+    }
+    else if($active === false) {
+      this.#removePilers().then(() => {
+        resolve($active)
+        this.#active = $active
+      })
+    }
+    this.#active = promise
   }
   get name() { return this.#settings.name }
   get fileReference() { return this.#settings.fileReference }
@@ -59,20 +68,17 @@ export default class DPMDocument extends EventTarget {
     return this.#pilers
   }
   async #addPilers() {
-    await this.#depile()
     iteratePilerTypes: 
     for(const $pilerType of PilerTypes) {
       const pilers = []
       iteratePilerSettings: 
       for(const $piler of this.#settings.pilers[$pilerType]) {
+        if($pilerType === 'sans') { continue iteratePilerTypes}
         this.pilers[$pilerType] = this.pilers[$pilerType] || []
         const Piler = Pilers[$piler.name]
         const piler = new Piler($piler, this)
         piler.active = true
         this.pilers[$pilerType].push(piler)
-        if(piler.type === 'sans') {
-          await piler.pile()
-        }
       }
     }
     return this
@@ -80,6 +86,7 @@ export default class DPMDocument extends EventTarget {
   async #removePilers() {
     iteratePilerTypes: 
     for(const $pilerType of PilerTypes) {
+      if($pilerType === 'sans') { continue iteratePilerTypes }
       const pilers = this.pilers[$pilerType]
       if(pilers && pilers.length) {
         let pilerIndex = 0
@@ -91,16 +98,17 @@ export default class DPMDocument extends EventTarget {
         }
       }
     }
-    await this.#depile()
     return this
   }
-  async #depile() {
-    if(this.#depiled) { return this } 
+  #depile() {
+    const depile = []
     iterateSansPilers: 
-    for(const $pilerInstance of this.pilers.sans || []) {
-      await $pilerInstance.pile()
+    for(const $sansPiler of this.#settings.pilers.sans || []) {
+      if($sansPiler.name === "ClearPiler") {
+        const clearPiler = new Pilers.ClearPiler($sansPiler, this)
+        depile.push(clearPiler.pile())
+      }
     }
-    this.#depiled = true
-    return this
+    return Promise.all(depile)
   }
 }

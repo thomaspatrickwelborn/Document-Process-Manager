@@ -5,11 +5,9 @@ export default class Route extends EventTarget {
   #router
   #expressRoute
   #source
-  // #target
   #static
   #methods
   #active = false
-  #depiled = false
   constructor($settings, $router) {
     super()
     this.#settings = $settings
@@ -23,13 +21,25 @@ export default class Route extends EventTarget {
   }
   get active() { return this.#active }
   set active($active) {
-    if(this.#active === $active) { return }
+    if($active === this.#active) { return }
     if($active === true) {
       this.static
       this.methods
     }
     else if($active === false) {
-      this.expressRoute.stack = []
+      this.expressRoute.stack.length = 0
+      let layerIndex = 0
+      let spliceLayers = []
+      const { stack } = this.#router.expressRouter._router
+      for(const $layer of stack) {
+        if($layer.route) {
+          if($layer.route.path === this.path) { spliceLayers.push(layerIndex) }
+        }
+        layerIndex++
+      }
+      for(const $spliceIndex of spliceLayers.reverse()) {
+        stack.splice($spliceIndex, 1)
+      }
       this.#static = undefined
       this.#methods = undefined
     }

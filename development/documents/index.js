@@ -77,6 +77,7 @@ export default class Documents extends EventTarget {
     if(preterDocument.length) {
       const [$documentIndex, $document] = preterDocument[0]
       $document.active = false
+      await $document.active
       const anterDocument = new DPMDocument(Object.assign(
         documentImport, { fileReference: changePath }
       ))
@@ -89,6 +90,7 @@ export default class Documents extends EventTarget {
     const [$documentIndex, $document] = this.getDocuments({ fileReference: unlinkPath })[0]
     if($document) {
       $document.active = false
+      await $document.active
       Array.prototype.splice.call(this, $documentIndex, 1)
     }
     return this

@@ -1,4 +1,4 @@
-import Piler from '../../piler/index.js'
+import Piler from '../../piler/ad/index.js'
 import createDir from '../../coutil/createDir/index.js'
 import micromatch from 'micromatch'
 import path from 'node:path'
@@ -26,8 +26,8 @@ export default class SimulePiler extends Piler {
         try {
           const createDirPath = this.output
           const copyPath = $path.replace(
-            new RegExp(`^${this.route.source}`), 
-            this.route.target
+            new RegExp(`^${this.document.source}`), 
+            this.document.target
           )
           await createDir($path)
           await cp($path, copyPath, {

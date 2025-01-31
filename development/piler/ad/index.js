@@ -1,8 +1,8 @@
 import path from 'node:path'
 import watch from 'glob-watcher'
-export default class Piler extends EventTarget {
+export default class Adpiler extends EventTarget {
   settings
-  route
+  document
   #active = false
   #input
   #output
@@ -10,20 +10,21 @@ export default class Piler extends EventTarget {
   #ignore
   #watcher
   #_boundPile
-  constructor($settings, $route) {
+  constructor($settings, $document) {
     super()
     this.settings = $settings
-    this.route = $route
+    this.document = $document
   }
   get active() { return this.#active }
   set active($active) {
     if(this.#active === $active) { return }
     if(this.watcher !== undefined) {
       if($active === true) {
-        this.watcher.on('ready', () => {})
+        this.watcher
       }
       else if($active === false) {
         this.watcher.close()
+        this.#watcher = undefined
       }
     }
     this.#active = $active
@@ -31,19 +32,19 @@ export default class Piler extends EventTarget {
   get type() { return this.settings.type }
   get input() {
     if(this.#input !== undefined) { return this.#input }
-    this.#input = path.join(this.route.source, this.settings.input)
+    this.#input = path.join(this.document.source, this.settings.input)
     return this.#input
   }
   get output() {
     if(this.#output !== undefined) { return this.#output }
-    this.#output = path.join(this.route.target, this.settings.output)
+    this.#output = path.join(this.document.target, this.settings.output)
     return this.#output
   }
   get watch() {
     if(this.#watch !== undefined) { return this.#watch }
     if(!this.settings.watch) { return this.#watch }
     const watch = this.settings.watch.map(
-      ($watchPath) => path.join(this.route.source, $watchPath)
+      ($watchPath) => path.join(this.document.source, $watchPath)
     )
     if(watch.length) { this.#watch = watch }
     return this.#watch
@@ -53,10 +54,10 @@ export default class Piler extends EventTarget {
     this.#ignore = Array.prototype.concat(
       // Settings - Ignore
       this.settings.ignore.map(
-        ($ignorePath) => path.join(this.route.source, $ignorePath)
+        ($ignorePath) => path.join(this.document.source, $ignorePath)
       ),
       // Route - Ignore
-      this.route.ignore
+      this.document.ignore
     )
     return this.#ignore
   }
