@@ -10,6 +10,7 @@ export default class Socket extends EventTarget {
   #active = false
   #messageAdapters
   #url
+  
   constructor($settings, $sockets) {
     super()
     this.#settings = $settings
@@ -47,7 +48,7 @@ export default class Socket extends EventTarget {
     if(this.#webSocketServer !== undefined) { return this.#webSocketServer }
     this.#webSocketServer = new WebSocketServer({
       path: this.url.pathname,
-      server: this.#sockets.server,
+      noServer: true,
     })
     this.#webSocketServer.on('connection', this.#websocketServerConnection.bind(this))
     this.#webSocketServer.on('close', this.#websocketServerClose.bind(this))
@@ -68,8 +69,8 @@ export default class Socket extends EventTarget {
   #websocketServerConnection($ws) { this.#webSocket = $ws }
   #websocketServerClose() { this.#webSocket = undefined }
   #websocketServerError($error) { console.error($error) }
-  #websocketOpen() {}
-  #websocketClose() {}
+  #websocketOpen($event) { console.log($event) }
+  #websocketClose($event) { console.log($event) }
   #websocketError($error) { console.error($error) }
   #websocketMessage($data, $isBinary) {
     iterateAdapters: 
