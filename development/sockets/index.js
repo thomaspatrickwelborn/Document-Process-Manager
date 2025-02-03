@@ -2,6 +2,7 @@ import path from 'node:path'
 import { rm, mkdir, readFile } from 'node:fs'
 import { globSync } from 'glob'
 import watch from 'glob-watcher'
+import { WebSocketServer } from 'ws'
 import Socket from './socket/index.js'
 export default class Sockets extends EventTarget {
   length = 0
@@ -10,15 +11,24 @@ export default class Sockets extends EventTarget {
   #base
   #source
   #target
+  #boundAdd
+  #boundChange
+  #boundUnlink
+  #boundServerUpgrade
   #_watcher
   #_boundAdd
   #_boundChange
   #_boundUnlink
   constructor($settings, $dpm) {
     super()
+    this.#boundServerUpgrade = this.#serverUpgrade.bind(this)
+    this.#boundAdd = this.#add.bind(this)
+    this.#boundChange = this.#change.bind(this)
+    this.#boundUnlink = this.#unlink.bind(this)
     this.#settings = $settings
     this.#dpm = $dpm
     this.#watcher
+    this.server.on('upgrade', this.#boundServerUpgrade)
   }
   get server() { return this.#dpm.server }
   get base() {
@@ -52,20 +62,20 @@ export default class Sockets extends EventTarget {
     this.#_watcher = watcher
     return this.#_watcher
   }
-  get #boundAdd() {
-    if(this.#_boundAdd !== undefined) { return this.#_boundAdd}
-    this.#_boundAdd = this.#add.bind(this)
-    return this.#_boundAdd
-  }
-  get #boundChange() {
-    if(this.#_boundChange !== undefined) { return this.#_boundChange}
-    this.#_boundChange = this.#change.bind(this)
-    return this.#_boundChange
-  }
-  get #boundUnlink() {
-    if(this.#_boundUnlink !== undefined) { return this.#_boundUnlink}
-    this.#_boundUnlink = this.#unlink.bind(this)
-    return this.#_boundUnlink
+  #serverUpgrade($request, $socket, $head) {
+    iterateSockets: 
+    for(const $webSocket of Array.from(this)) {
+      const { pathname } = new URL($request.url, $webSocket.url.origin)
+      if(
+        pathname === $webSocket.url.pathname &&
+        $webSocket.active === true
+      ) {
+        $webSocket.webSocketServer.handleUpgrade($request, $socket, $head, function done($ws) {
+          $webSocket.webSocketServer.emit('connection', $ws, $request)
+        })
+        break iterateSockets
+      }
+    }
   }
   async #add($path) {
     const socketPath = path.join(process.env.PWD, $path)
