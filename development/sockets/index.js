@@ -8,6 +8,7 @@ export default class Sockets extends EventTarget {
   length = 0
   #settings
   #dpm
+  #server
   #base
   #source
   #target
@@ -16,9 +17,6 @@ export default class Sockets extends EventTarget {
   #boundUnlink
   #boundServerUpgrade
   #_watcher
-  #_boundAdd
-  #_boundChange
-  #_boundUnlink
   constructor($settings, $dpm) {
     super()
     this.#boundServerUpgrade = this.#serverUpgrade.bind(this)
@@ -27,10 +25,15 @@ export default class Sockets extends EventTarget {
     this.#boundUnlink = this.#unlink.bind(this)
     this.#settings = $settings
     this.#dpm = $dpm
+    this.server
     this.#watcher
-    this.server.on('upgrade', this.#boundServerUpgrade)
   }
-  get server() { return this.#dpm.server }
+  get server() {
+    if(this.#server !== undefined) return this.#server
+    this.#server = this.#dpm.server
+    this.#server.on('upgrade', this.#boundServerUpgrade)
+    return this.#dpm.server
+  }
   get base() {
     const { protocol, host, port } = this.#settings
     if(protocol && host && port) {
