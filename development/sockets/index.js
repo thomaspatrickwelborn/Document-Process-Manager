@@ -12,17 +12,13 @@ export default class Sockets extends EventTarget {
   #base
   #source
   #target
-  #boundAdd
-  #boundChange
-  #boundUnlink
-  #boundServerUpgrade
+  #boundServerUpgrade = this.#serverUpgrade.bind(this)
+  #boundAdd = this.#add.bind(this)
+  #boundChange = this.#change.bind(this)
+  #boundUnlink = this.#unlink.bind(this)
   #_watcher
   constructor($settings, $dpm) {
     super()
-    this.#boundServerUpgrade = this.#serverUpgrade.bind(this)
-    this.#boundAdd = this.#add.bind(this)
-    this.#boundChange = this.#change.bind(this)
-    this.#boundUnlink = this.#unlink.bind(this)
     this.#settings = $settings
     this.#dpm = $dpm
     this.server

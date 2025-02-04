@@ -1,4 +1,5 @@
 import './coutil/persist/index.js'
+import recursiveAssign from './coutil/recursiveAssign/index.js'
 import path from 'node:path'
 import inspector from 'node:inspector'
 import http from 'node:http'
@@ -45,7 +46,7 @@ export default class DocumentProcessManager extends EventTarget {
       // Node HTTPS Server
       this.#server = https.createServer(
         this.#settings.server.https,
-        this.router.expressRouter
+        this.router.express
       )
       this.#server.listen(
         this.#settings.server.https.port, 
@@ -70,13 +71,14 @@ export default class DocumentProcessManager extends EventTarget {
   // Router
   get router() {
     if(this.#router !== undefined) { return this.#router }
+    // if(this.server === undefined) return
     this.#router = new Router(this.#settings.router || {}, this)
     return this.#router
   }
   // Sockets
   get sockets() {
     if(this.#sockets !== undefined) { return this.#sockets }
-    if(this.server === undefined) { return undefined }
+    if(this.#server === undefined) { return undefined }
     if(this.#settings.sockets !== undefined) {
       this.#sockets = new Sockets(this.#settings.sockets, this)
     }
@@ -94,22 +96,14 @@ export default class DocumentProcessManager extends EventTarget {
   get browserSync() {
     if(this.#browserSync !== undefined) { return this.#browserSync }
     if(this.#settings.browserSync === undefined) return
-    const browserSyncServerOptions = {
-      ui: false, 
-      open: false, 
-      https: this.#settings.browserSync.https,
-      host: this.#settings.browserSync.host,
-      port: this.#settings.browserSync.port,
-      files: this.#settings.browserSync.files,
+    const browserSyncServerOptions = recursiveAssign(this.#settings.browserSync, {
       proxy: {
-        target: [
-          "https://",
+        target: "https://".concat(
           this.#settings.server.https.host, ":",
           this.#settings.server.https.port,
-        ].join(''),
-        ws: this.#settings.browserSync.proxy.ws,
+        ),
       },
-    }
+    })
     this.#browserSync = browserSync.create()
     this.#browserSync.init(browserSyncServerOptions)
     this.dispatchEvent(new CustomEvent('ready', { detail: this }))

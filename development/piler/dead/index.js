@@ -5,7 +5,7 @@ export default class Deadpiler extends EventTarget {
   document
   #ignore
   #path
-  #_boundPile
+  #boundPile = this.pile.bind(this)
   constructor($settings, $document) {
     super()
     this.settings = $settings
@@ -30,10 +30,5 @@ export default class Deadpiler extends EventTarget {
       ($path) => path.join(this.document[this.settings.target], $path)
     )
     return this.#path
-  }
-  get #boundPile() {
-    if(this.#_boundPile !== undefined) { return this.#_boundPile }
-    this.#_boundPile = this.pile.bind(this)
-    return this.#_boundPile
   }
 }

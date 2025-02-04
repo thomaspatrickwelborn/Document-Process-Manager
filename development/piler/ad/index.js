@@ -9,7 +9,7 @@ export default class Adpiler extends EventTarget {
   #watch
   #ignore
   #watcher
-  #_boundPile
+  #boundPile = this.pile.bind(this)
   constructor($settings, $document) {
     super()
     this.settings = $settings
@@ -73,10 +73,5 @@ export default class Adpiler extends EventTarget {
     watcher.on('change', ($path, $stats) => this.#boundPile($path))
     this.#watcher = watcher
     return this.#watcher
-  }
-  get #boundPile() {
-    if(this.#_boundPile !== undefined) { return this.#_boundPile }
-    this.#_boundPile = this.pile.bind(this)
-    return this.#_boundPile
   }
 }

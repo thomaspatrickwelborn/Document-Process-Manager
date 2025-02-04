@@ -8,25 +8,35 @@ export default class Router extends EventTarget {
   length = 0
   #settings
   #dpm
-  #expressRouter
-  #static
+  #express
+  #expressRoute
+  #middlewares
+  #methods
+  #errors
   #source
   #target
   #_watcher
-  #_boundAdd
-  #_boundChange
-  #_boundUnlink
+  #boundAdd = this.#add.bind(this)
+  #boundChange = this.#change.bind(this)
+  #boundUnlink = this.#unlink.bind(this)
   constructor($settings, $dpm) {
     super()
     this.#settings = $settings
     this.#dpm = $dpm
-    this.static
+    this.middlewares
+    this.methods
+    this.errors
     this.#watcher
   }
-  get expressRouter() {
-    if(this.#expressRouter !== undefined) { return this.#expressRouter }
-    this.#expressRouter = express(this.#settings.router || {})
-    return this.#expressRouter
+  get express() {
+    if(this.#express !== undefined) { return this.#express }
+    this.#express = express(this.#settings.router || {})
+    return this.#express
+  }
+  get expressRoute() {
+    if(this.#expressRoute !== undefined) { return this.#expressRoute }
+    this.#expressRoute = this.express.route(this.path)
+    return this.#expressRoute
   }
   get #config() { return this.#settings.config }
   get source() {
@@ -34,20 +44,77 @@ export default class Router extends EventTarget {
     this.#source = path.join(process.env.PWD, this.#settings.source)
     return this.#source
   }
-  get static() {
-    if(this.#static !== undefined) { return this.#static }
-    if(this.#settings.static !== undefined) {
-      const staticElements = []
-      for(const [$staticPath, $staticOptions] of this.#settings.static) {
-        const staticPath = path.join(process.env.PWD, $staticPath)
-        const staticElement = express.static(staticPath, $staticOptions)
-        this.expressRouter.use(staticElement)
-        staticElements.push([staticPath, staticElement])
+
+  get middlewares() {
+    if(this.#middlewares !== undefined) { return this.#middlewares }
+    if(this.#settings.middlewares !== undefined) {
+      const middlewares = []
+      for(const $middleware of this.#settings.middlewares) {
+        let middleware
+        if($middleware.length === 1 && typeof $middleware === 'function') {
+          middleware = $middleware[0]
+        }
+        else {
+          const middlewareName = $middleware.splice(0, 1)[0]
+          const middlewareArguments = $middleware.flat()
+          if(['json', 'static', 'urlencoded'].includes(middlewareName)) {
+            middleware = express[middlewareName](...middlewareArguments)
+          }
+          else {
+            middleware = this.express[middlewareName](...middlewareArguments)
+          }
+        }
+        if(middleware) {
+          this.express.use(this.path, middleware)
+          middlewares.push(middleware)
+        }
       }
-      this.#static = staticElements
+      this.#middlewares = middlewares
     }
-    return this.#static
+    return this.#middlewares
   }
+  get methods() {
+    if(this.#methods !== undefined) { return this.#methods }
+    if(this.#settings.methods !== undefined) {
+      const methods = []
+      for(const [$methodName, $method] of this.#settings.methods) {
+        const method = this.expressRoute[$methodName]($method)
+        methods.push(method)
+      }
+      this.#methods = methods
+    }
+    return this.#methods
+  }
+  get errors() {
+    if(this.#errors !== undefined) { return this.#errors }
+    if(this.#settings.errors !== undefined) {
+      const errors = []
+      for(const $error of this.#settings.errors) {
+        let error
+        if($error.length === 1 && typeof $error === 'function') {
+          error = $error[0]
+          this.express.use(this.path, error)
+        }
+        errors.push(error)
+      }
+      this.#errors = errors
+    }
+    return this.#errors
+  }
+  // get static() {
+  //   if(this.#static !== undefined) { return this.#static }
+  //   if(this.#settings.static !== undefined) {
+  //     const staticElements = []
+  //     for(const [$staticPath, $staticOptions] of this.#settings.static) {
+  //       const staticPath = path.join(process.env.PWD, $staticPath)
+  //       const staticElement = express.static(staticPath, $staticOptions)
+  //       this.express.use(staticElement)
+  //       staticElements.push([staticPath, staticElement])
+  //     }
+  //     this.#static = staticElements
+  //   }
+  //   return this.#static
+  // }
   get #watcher() {
     if(this.#_watcher !== undefined) { return this.#_watcher }
     const watchPath = `${this.source}/**/${this.#config}`
@@ -60,21 +127,6 @@ export default class Router extends EventTarget {
     watcher.on('unlink', this.#boundUnlink)
     this.#_watcher = watcher
     return this.#_watcher
-  }
-  get #boundAdd() {
-    if(this.#_boundAdd !== undefined) { return this.#_boundAdd}
-    this.#_boundAdd = this.#add.bind(this)
-    return this.#_boundAdd
-  }
-  get #boundChange() {
-    if(this.#_boundChange !== undefined) { return this.#_boundChange}
-    this.#_boundChange = this.#change.bind(this)
-    return this.#_boundChange
-  }
-  get #boundUnlink() {
-    if(this.#_boundUnlink !== undefined) { return this.#_boundUnlink}
-    this.#_boundUnlink = this.#unlink.bind(this)
-    return this.#_boundUnlink
   }
   async #add($path) {
     const routePath = path.join(process.env.PWD, $path)

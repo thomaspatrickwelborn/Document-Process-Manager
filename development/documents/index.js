@@ -11,9 +11,9 @@ export default class Documents extends EventTarget {
   #source
   #target
   #_watcher
-  #_boundAdd
-  #_boundChange
-  #_boundUnlink
+  #boundAdd = this.#add.bind(this)
+  #boundChange = this.#change.bind(this)
+  #boundUnlink = this.#unlink.bind(this)
   constructor($settings, $dpm) {
     super()
     this.#settings = $settings
@@ -44,21 +44,6 @@ export default class Documents extends EventTarget {
     watcher.on('unlink', this.#boundUnlink)
     this.#_watcher = watcher
     return this.#_watcher
-  }
-  get #boundAdd() {
-    if(this.#_boundAdd !== undefined) { return this.#_boundAdd}
-    this.#_boundAdd = this.#add.bind(this)
-    return this.#_boundAdd
-  }
-  get #boundChange() {
-    if(this.#_boundChange !== undefined) { return this.#_boundChange}
-    this.#_boundChange = this.#change.bind(this)
-    return this.#_boundChange
-  }
-  get #boundUnlink() {
-    if(this.#_boundUnlink !== undefined) { return this.#_boundUnlink}
-    this.#_boundUnlink = this.#unlink.bind(this)
-    return this.#_boundUnlink
   }
   async #add($path) {
     const addPath = path.join(process.env.PWD, $path)

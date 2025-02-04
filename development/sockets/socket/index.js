@@ -14,16 +14,12 @@ export default class Socket extends EventTarget {
   #_webSocketOpen
   #_webSocketClose
   #_webSocketError
-  #boundWebSocketMessage
-  #boundWebSocketServerConnection
-  #boundWebSocketServerClose
-  #boundWebSocketServerError
+  #boundWebSocketServerConnection = this.#webSocketServerConnection.bind(this)
+  #boundWebSocketServerClose = this.#webSocketServerClose.bind(this)
+  #boundWebSocketServerError = this.#webSocketServerError.bind(this)
+  #boundWebSocketMessage = this.#webSocketMessage.bind(this)
   constructor($settings, $sockets) {
     super()
-    this.#boundWebSocketServerConnection = this.#webSocketServerConnection.bind(this)
-    this.#boundWebSocketServerClose = this.#webSocketServerClose.bind(this)
-    this.#boundWebSocketServerError = this.#webSocketServerError.bind(this)
-    this.#boundWebSocketMessage = this.#webSocketMessage.bind(this)
     this.#settings = $settings
     this.#sockets = $sockets
     this.active = this.#settings.active

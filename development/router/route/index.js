@@ -3,10 +3,13 @@ import express from 'express'
 export default class Route extends EventTarget {
   #settings
   #router
+  #expressRouter
   #expressRoute
   #source
   #static
+  #middlewares
   #methods
+  #errors
   #active = false
   constructor($settings, $router) {
     super()
@@ -14,9 +17,15 @@ export default class Route extends EventTarget {
     this.#router = $router
     this.active = this.#settings.active
   }
+  get expressRouter() {
+    if(this.#expressRouter !== undefined) { return this.#expressRouter }
+    this.#expressRouter = express.Router()
+    this.#router.express.use(this.#expressRouter)
+    return this.#expressRouter
+  }
   get expressRoute() {
     if(this.#expressRoute !== undefined) { return this.#expressRoute }
-    this.#expressRoute = this.#router.expressRouter.route(this.path)
+    this.#expressRoute = this.expressRouter.route(this.path)
     return this.#expressRoute
   }
   get active() { return this.#active }
@@ -24,23 +33,25 @@ export default class Route extends EventTarget {
     if($active === this.#active) { return }
     if($active === true) {
       this.static
+      this.middlewares
       this.methods
+      this.errors
     }
     else if($active === false) {
       this.expressRoute.stack.length = 0
       let layerIndex = 0
       let spliceLayers = []
-      const { stack } = this.#router.expressRouter._router
+      const { stack } = this.#router.express._router
       for(const $layer of stack) {
-        if($layer.route) {
-          if($layer.route.path === this.path) { spliceLayers.push(layerIndex) }
+        if($layer.name === 'router' && $layer.handle) {
+          if($layer.handle === this.expressRouter) { spliceLayers.push(layerIndex) }
         }
         layerIndex++
       }
       for(const $spliceIndex of spliceLayers.reverse()) {
         stack.splice($spliceIndex, 1)
       }
-      this.#static = undefined
+      this.#middlewares = undefined
       this.#methods = undefined
     }
     this.#active = $active
@@ -52,19 +63,33 @@ export default class Route extends EventTarget {
     this.#source = path.join(process.env.PWD, this.#settings.source)
     return this.#source
   }
-  get static() {
-    if(this.#static !== undefined) { return this.#static }
-    if(this.#settings.static !== undefined) {
-      const staticElements = []
-      for(const [$staticPath, $staticOptions] of this.#settings.static) {
-        const staticPath = path.join(process.env.PWD, $staticPath)
-        const staticElement = express.static(staticPath, $staticOptions)
-        this.#expressRoute.use(staticElement)
-        staticElements.push([staticPath, staticElement])
+  get middlewares() {
+    if(this.#middlewares !== undefined) { return this.#middlewares }
+    if(this.#settings.middlewares !== undefined) {
+      const middlewares = []
+      for(const $middleware of this.#settings.middlewares) {
+        let middleware
+        if($middleware.length === 1 && typeof $middleware === 'function') {
+          middleware = $middleware[0]
+        }
+        else {
+          const middlewareName = $middleware.splice(0, 1)[0]
+          const middlewareArguments = $middleware.flat()
+          if(['json', 'static', 'urlencoded'].includes(middlewareName)) {
+            middleware = express[middlewareName](...middlewareArguments)
+          }
+          else {
+            middleware = this.expressRouter[middlewareName](...middlewareArguments)
+          }
+        }
+        if(middleware) {
+          this.expressRouter.use(this.path, middleware)
+          middlewares.push(middleware)
+        }
       }
-      this.#static = staticElements
+      this.#middlewares = middlewares
     }
-    return this.#static
+    return this.#middlewares
   }
   get methods() {
     if(this.#methods !== undefined) { return this.#methods }
@@ -78,5 +103,20 @@ export default class Route extends EventTarget {
     }
     return this.#methods
   }
-  
+  get errors() {
+    if(this.#errors !== undefined) { return this.#errors }
+    if(this.#settings.errors !== undefined) {
+      const errors = []
+      for(const $error of this.#settings.errors) {
+        let error
+        if($error.length === 1 && typeof $error === 'function') {
+          error = $error[0]
+          this.expressRouter.use(this.path, error)
+        }
+        errors.push(error)
+      }
+      this.#errors = errors
+    }
+    return this.#errors
+  }
 }
