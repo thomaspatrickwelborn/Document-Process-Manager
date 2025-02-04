@@ -2,6 +2,7 @@ import { URL } from 'node:url'
 import { Buffer } from 'node:buffer'
 import { WebSocketServer } from 'ws'
 import MessageAdapter from './messageAdapter/index.js'
+import SocketEvent from './event/index.js'
 export default class Socket extends EventTarget {
   #settings
   #sockets
@@ -99,13 +100,11 @@ export default class Socket extends EventTarget {
   }
   #webSocketMessage($data, $isBinary) {
     iterateAdapters: 
-    for(const [
-      $messageAdapterName, $messageAdapter
-    ] of this.messageAdapters) {
+    for(const $messageAdapter of this.messageAdapters) {
       try {
         const message = $messageAdapter.message($data, $isBinary)
         const { type, detail } = message(this.#webSocket, $data, $isBinary)
-        const messageEvent = new CustomEvent(type, { detail })
+        const messageEvent = new SocketEvent(type, { detail, message: $data, isBinary: $isBinary })
         this.dispatchEvent(messageEvent)
       }
       catch($err) { /* console.log($err) */ }
@@ -114,13 +113,14 @@ export default class Socket extends EventTarget {
   get messageAdapters() {
     if(this.#messageAdapters !== undefined) { return this.#messageAdapters }
     const messageAdapters = []
-    for(const [$adapterName, $adapter] of this.#settings.messageAdapters) {
+    for(const $adapter of this.#settings.messageAdapters) {
       let adapter
       if($adapter instanceof MessageAdapter) { adapter = adapter }
       else { adapter = new MessageAdapter($adapter, this) }
-      messageAdapters.push([$adapterName, adapter])
+      messageAdapters.push(adapter)
     }
     this.#messageAdapters = messageAdapters
     return this.#messageAdapters
   }
+  send() { this.#webSocket.send(...arguments) }
 }
