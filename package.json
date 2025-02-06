@@ -2,7 +2,7 @@
   "name": "document-process-manager",
   "author": "Thomas Patrick Welborn",
   "description": "Document Process Manager (DPM)",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "license": "ISC",
   "type": "module",
   "main": "index.js",
@@ -10,7 +10,14 @@
     "develop": "npm run start --workspace development"
   },
   "imports": {},
-  "workspaces": ["development"],
-  "bin": { "dpm": "./bin/index.js" },
-  "repository": "https://github.com/thomaspatrickwelborn/Document-Process-Manager"
+  "workspaces": [
+    "development"
+  ],
+  "bin": {
+    "dpm": "./bin/index.js"
+  },
+  "repository": "https://github.com/thomaspatrickwelborn/Document-Process-Manager",
+  "devDependencies": {
+    "yargs": "^17.7.2"
+  }
 }

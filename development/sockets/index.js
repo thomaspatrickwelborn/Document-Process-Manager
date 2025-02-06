@@ -9,7 +9,6 @@ export default class Sockets extends EventTarget {
   #settings
   #dpm
   #server
-  #base
   #source
   #target
   #boundServerUpgrade = this.#serverUpgrade.bind(this)
@@ -29,13 +28,6 @@ export default class Sockets extends EventTarget {
     this.#server = this.#dpm.server
     this.#server.on('upgrade', this.#boundServerUpgrade)
     return this.#dpm.server
-  }
-  get base() {
-    const { protocol, host, port } = this.#settings
-    if(protocol && host && port) {
-      this.#base = [protocol, '//', host, ':', port].join('')
-    }
-    return this.#base
   }
   get #config() { return this.#settings.config }
   get source() {
@@ -64,9 +56,8 @@ export default class Sockets extends EventTarget {
   #serverUpgrade($request, $socket, $head) {
     iterateSockets: 
     for(const $webSocket of Array.from(this)) {
-      const { pathname } = new URL($request.url, $webSocket.url.origin)
       if(
-        pathname === $webSocket.url.pathname &&
+        $request.url === $webSocket.path &&
         $webSocket.active === true
       ) {
         $webSocket.webSocketServer.handleUpgrade($request, $socket, $head, function done($ws) {

@@ -6,7 +6,6 @@ export default class Route extends EventTarget {
   #expressRouter
   #expressRoute
   #source
-  #static
   #middlewares
   #methods
   #errors
@@ -32,7 +31,6 @@ export default class Route extends EventTarget {
   set active($active) {
     if($active === this.#active) { return }
     if($active === true) {
-      this.static
       this.middlewares
       this.methods
       this.errors

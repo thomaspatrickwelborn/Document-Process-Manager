@@ -10,7 +10,6 @@ export default class Socket extends EventTarget {
   #_webSocket
   #active = false
   #messageAdapters
-  #url
   #_webSocketOpen
   #_webSocketClose
   #_webSocketError
@@ -31,30 +30,15 @@ export default class Socket extends EventTarget {
     }
     else if($active === false) {
       this.webSocketServer?.close()
-      this.#webSocketServer = undefined 
-      this.#webSocket = undefined
     }
     this.#active = $active
   }
   get fileReference() { return this.#settings.fileReference }
   get path() { return this.#settings.path }
-  get url() {
-    if(this.#url !== undefined) { return this.#url }
-    let { protocol, host, port } = this.#settings
-    let base
-    if(protocol && host && port) {
-      base = [protocol, '//', host, ':', port].join('')
-    }
-    else {
-      base = this.sockets.base
-    }
-    this.#url = new URL(this.path, base)
-    return this.#url
-  }
   get webSocketServer() {
     if(this.#webSocketServer !== undefined) { return this.#webSocketServer }
     this.#webSocketServer = new WebSocketServer({
-      path: this.url.pathname,
+      path: this.path,
       noServer: true,
     })
     this.#webSocketServer.on('connection', this.#boundWebSocketServerConnection)
@@ -74,7 +58,10 @@ export default class Socket extends EventTarget {
     }
   }
   #webSocketServerConnection($ws) { this.#webSocket = $ws }
-  #webSocketServerClose() { this.#webSocket = undefined }
+  #webSocketServerClose() {
+    this.#webSocketServer = undefined 
+    this.#webSocket = undefined
+  }
   #webSocketServerError($error) { console.error($error) }
   get #webSocketOpen() {
     if(this.#_webSocketOpen !== undefined) { return this.#_webSocketOpen }

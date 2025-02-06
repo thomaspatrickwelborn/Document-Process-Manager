@@ -10,6 +10,7 @@ import { WebSocketServer } from 'ws'
 import Router from './router/index.js'
 import Sockets from './sockets/index.js'
 import Documents from './documents/index.js'
+import Databases from './databases/mongo/index.js'
 export default class DocumentProcessManager extends EventTarget {
   #settings
   #inspector
@@ -19,10 +20,12 @@ export default class DocumentProcessManager extends EventTarget {
   #router
   #sockets
   #documents
+  #databases
   constructor($settings) {
     super()
     this.#settings = $settings
     this.inspector
+    this.databases
     this.documents
     this.server
     this.sockets
@@ -91,6 +94,14 @@ export default class DocumentProcessManager extends EventTarget {
       this.#documents = new Documents(this.#settings.documents, this)
     }
     return this.#documents
+  }
+  // Databases
+  get databases() {
+    if(this.#databases !== undefined) { return this.#databases }
+    if(this.#settings.databases !== undefined) {
+      this.#databases = new Databases(this.#settings.databases, this)
+    }
+    return this.#databases
   }
   // BrowserSync
   get browserSync() {
