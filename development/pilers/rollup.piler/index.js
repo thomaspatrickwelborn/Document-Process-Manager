@@ -40,7 +40,11 @@ export default class RollupPiler extends Piler{
       const rollupPile = await rollup.rollup(inputOptions)
       const rollupPileOutput = await rollupPile.generate(outputOptions)
       const rollupFile = rollupPileOutput.output[0].code
+      const rollupFileMap = rollupPileOutput.output[0].map
       writeFile(this.output, rollupFile)
+      if(this.outputOptions.sourcemap === true) {
+        writeFile(this.output.concat('.map'), JSON.stringify(rollupFileMap))
+      }
       return rollupFile
     }
     catch($err) { console.log($err) }
