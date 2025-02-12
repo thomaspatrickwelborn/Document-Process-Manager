@@ -44,7 +44,6 @@ export default class Router extends EventTarget {
     this.#source = path.join(process.env.PWD, this.#settings.source)
     return this.#source
   }
-
   get middlewares() {
     if(this.#middlewares !== undefined) { return this.#middlewares }
     if(this.#settings.middlewares !== undefined) {
@@ -65,7 +64,7 @@ export default class Router extends EventTarget {
           }
         }
         if(middleware) {
-          this.express.use(this.path, middleware)
+          this.express.use(middleware)
           middlewares.push(middleware)
         }
       }

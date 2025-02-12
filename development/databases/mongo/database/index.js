@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 export default class MongoDatabase extends EventTarget {
   #settings
   #databases
@@ -27,19 +27,13 @@ export default class MongoDatabase extends EventTarget {
   get path() { return this.#settings.path }
   get connection() {
     if(this.#connection !== undefined) { return this.#connection }
-    this.#connection = mongoose.createConnection({
-      path: this.path,
-      noServer: true,
-    })
+    this.#connection = mongoose.createConnection(this.path, this.options)
     this.#connection.on('connection', this.#boundConnectionConnected)
     this.#connection.on('close', this.#boundConnectionDisconnected)
     this.#connection.on('error', this.#boundConnectionError)
     return this.#connection
   }
   #connectionConnected() {}
-  #connectionDisconnected() {
-     this.#connection = undefined 
-  }
+  #connectionDisconnected() { this.#connection = undefined  }
   #connectionError($error) { console.error($error) }
-  
 }
