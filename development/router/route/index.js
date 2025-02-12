@@ -81,7 +81,7 @@ export default class Route extends EventTarget {
           }
         }
         if(middleware) {
-          this.expressRouter.use(this.path, middleware)
+          this.expressRouter.use(middleware)
           middlewares.push(middleware)
         }
       }
