@@ -24,6 +24,7 @@ export default class DPMDocument extends EventTarget {
       this.active = this.#settings.active
     })
   }
+  get parent() { return this.#documents }
   get active() { return this.#active }
   set active($active) {
     let { promise, resolve, reject } = Promise.withResolvers()

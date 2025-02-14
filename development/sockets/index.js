@@ -23,6 +23,7 @@ export default class Sockets extends EventTarget {
     this.server
     this.#watcher
   }
+  get parent() { return this.#dpm }
   get server() {
     if(this.#server !== undefined) return this.#server
     this.#server = this.#dpm.server

@@ -1,5 +1,6 @@
 export default [
   "cache",
+  "client",
   "filename",
   "delimiter",
   "openDelimiter",

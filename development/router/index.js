@@ -28,6 +28,7 @@ export default class Router extends EventTarget {
     this.errors
     this.#watcher
   }
+  get parent() { return this.#dpm }
   get express() {
     if(this.#express !== undefined) { return this.#express }
     this.#express = express(this.#settings.router || {})

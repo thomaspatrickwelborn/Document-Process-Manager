@@ -23,6 +23,7 @@ export default class Socket extends EventTarget {
     this.#sockets = $sockets
     this.active = this.#settings.active
   }
+  get parent() { return this.#sockets }
   get active() { return this.#active }
   set active($active) {
     if($active === true) {

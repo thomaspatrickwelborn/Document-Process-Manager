@@ -14,6 +14,7 @@ export default class MongoDatabases extends EventTarget {
     this.#watcher
     console.log(this)
   }
+  get parent() { return this.#dpm }
   get #config() { return this.#settings.config }
   get source() {
     if(this.#settings.source !== undefined) return this.#settings.source

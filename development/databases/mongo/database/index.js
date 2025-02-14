@@ -13,6 +13,7 @@ export default class MongoDatabase extends EventTarget {
     this.#databases = $databases
     this.active = this.#settings.active
   }
+  get parent() { return this.#databases }
   get active() { return this.#active }
   set active($active) {
     if($active === true) {

@@ -44,7 +44,7 @@ export default class DocumentProcessManager extends EventTarget {
   // Node Server
   get server() {
     if(this.#server !== undefined) { return this.#server }
-    if(this.#settings.server === undefined) return
+    if(this.#settings.server === undefined) { this.#server === undefined }
     if(this.#settings.server.https) {
       // Node HTTPS Server
       this.#server = https.createServer(
@@ -74,14 +74,14 @@ export default class DocumentProcessManager extends EventTarget {
   // Router
   get router() {
     if(this.#router !== undefined) { return this.#router }
-    // if(this.server === undefined) return
+    if(this.#settings.server === undefined) return
     this.#router = new Router(this.#settings.router || {}, this)
     return this.#router
   }
   // Sockets
   get sockets() {
     if(this.#sockets !== undefined) { return this.#sockets }
-    if(this.#server === undefined) { return undefined }
+    if(this.#settings.server === undefined) return
     if(this.#settings.sockets !== undefined) {
       this.#sockets = new Sockets(this.#settings.sockets, this)
     }

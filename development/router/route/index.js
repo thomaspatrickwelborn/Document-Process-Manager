@@ -16,6 +16,7 @@ export default class Route extends EventTarget {
     this.#router = $router
     this.active = this.#settings.active
   }
+  get parent() { return this.#router }
   get expressRouter() {
     if(this.#expressRouter !== undefined) { return this.#expressRouter }
     this.#expressRouter = express.Router()
@@ -81,7 +82,7 @@ export default class Route extends EventTarget {
           }
         }
         if(middleware) {
-          this.expressRouter.use(middleware)
+          this.expressRouter.use(this.path, middleware)
           middlewares.push(middleware)
         }
       }

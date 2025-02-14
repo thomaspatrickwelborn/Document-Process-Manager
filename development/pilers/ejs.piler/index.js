@@ -59,7 +59,10 @@ export default class EJSPiler extends Piler {
     await createDir(path.dirname($path))
     let viewPileBeautify
     // Server
-    if(settings.outputType === 'server') {
+    if(
+      settings.outputType === 'server' ||
+      settings.outputType === undefined
+    ) {
       try {
         const model = JSON.parse(await readFile(this.model))
         const templatePath = this.input

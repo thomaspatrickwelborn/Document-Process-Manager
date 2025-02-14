@@ -21,6 +21,7 @@ export default class Documents extends EventTarget {
     this.static
     this.#watcher
   }
+  get parent() { return this.#dpm }
   get #config() { return this.#settings.config }
   get source() {
     if(this.#settings.source !== undefined) return this.#settings.source
