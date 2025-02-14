@@ -95,7 +95,7 @@ export default class Route extends EventTarget {
     if(this.#settings.methods !== undefined) {
       const methods = []
       for(const [$methodName, $method] of this.#settings.methods) {
-        const method = this.expressRoute[$methodName]($method)
+        const method = this.expressRoute[$methodName]($method.bind(this))
         methods.push(method)
       }
       this.#methods = methods

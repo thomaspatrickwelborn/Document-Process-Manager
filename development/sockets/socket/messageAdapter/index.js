@@ -13,11 +13,12 @@ export default class MessageAdapter extends EventTarget {
     if(this.#messages !== undefined) {
       return this.#messages
     }
+    this.#messages = {}
     if(this.#settings.messages !== undefined) {
-      this.#messages = this.#settings.messages
-    }
-    else {
-      this.#messages = {}
+      for(const [$messageName, $message] of Object.entries(this.#settings.messages)) {
+        const message = $message.bind(this.#socket)
+        this.#messages[$messageName] = message
+      }
     }
     return this.#messages
   }
