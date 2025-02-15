@@ -7,7 +7,7 @@ import https from 'node:https'
 import express from 'express'
 import browserSync from 'browser-sync'
 import { WebSocketServer } from 'ws'
-import Router from './router/index.js'
+import Router from './routers/index.js'
 import Sockets from './sockets/index.js'
 import Documents from './documents/index.js'
 import Databases from './databases/mongo/index.js'
@@ -17,7 +17,7 @@ export default class DocumentProcessManager extends EventTarget {
   #server
   #express
   #browserSync
-  #router
+  #routers
   #sockets
   #documents
   #databases
@@ -49,7 +49,7 @@ export default class DocumentProcessManager extends EventTarget {
       // Node HTTPS Server
       this.#server = https.createServer(
         this.#settings.server.https,
-        this.router.express
+        this.routers.express
       )
       this.#server.listen(
         this.#settings.server.https.port, 
@@ -61,7 +61,7 @@ export default class DocumentProcessManager extends EventTarget {
       // Node HTTPS Server
       this.#server = http.createServer(
         this.#settings.server.http,
-        this.router.$
+        this.routers.express
       )
       this.#server.listen(
         this.#settings.server.http.port, 
@@ -72,11 +72,11 @@ export default class DocumentProcessManager extends EventTarget {
     return this.#server
   }
   // Router
-  get router() {
-    if(this.#router !== undefined) { return this.#router }
+  get routers() {
+    if(this.#routers !== undefined) { return this.#routers }
     if(this.#settings.server === undefined) return
-    this.#router = new Router(this.#settings.router || {}, this)
-    return this.#router
+    this.#routers = new Router(this.#settings.routers || {}, this)
+    return this.#routers
   }
   // Sockets
   get sockets() {

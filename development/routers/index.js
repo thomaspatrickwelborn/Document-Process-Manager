@@ -4,7 +4,7 @@ import express from 'express'
 import { globSync } from 'glob'
 import watch from 'glob-watcher'
 import Route from './route/index.js'
-export default class Router extends EventTarget {
+export default class Routers extends EventTarget {
   length = 0
   #settings
   #dpm
