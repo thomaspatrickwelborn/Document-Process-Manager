@@ -1,7 +1,6 @@
-import Core from '../../Core/index.js'
 import path from 'node:path'
 import express from 'express'
-export default class Route extends Core {
+export default class Route extends EventTarget {
   #settings
   #router
   #expressRouter

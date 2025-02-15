@@ -1,4 +1,3 @@
-import Core from '../../Core/index.js'
 import * as Pilers from '../../pilers/index.js'
 import path from 'node:path'
 import { rm } from 'node:fs/promises'
@@ -9,7 +8,7 @@ const PilerTypes = [
   'scripts',
   'structs',
 ]
-export default class DPMDocument extends Core {
+export default class DPMDocument extends EventTarget {
   #settings
   #documents
   #pilers

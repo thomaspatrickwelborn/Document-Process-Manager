@@ -1,6 +1,5 @@
-import Core from '../../Core/index.js'
 import mongoose, { Schema } from 'mongoose'
-export default class MongoDatabase extends Core {
+export default class MongoDatabase extends EventTarget {
   #settings
   #databases
   #active = false
