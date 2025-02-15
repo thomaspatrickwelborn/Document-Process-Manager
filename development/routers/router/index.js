@@ -1,6 +1,6 @@
 import path from 'node:path'
 import express from 'express'
-export default class Route extends EventTarget {
+export default class Router extends EventTarget {
   #settings
   #router
   #expressRouter

@@ -3,7 +3,7 @@ import { rm, mkdir, readFile } from 'node:fs'
 import express from 'express'
 import { globSync } from 'glob'
 import watch from 'glob-watcher'
-import Route from './route/index.js'
+import Router from './router/index.js'
 export default class Routers extends EventTarget {
   length = 0
   #settings
@@ -101,20 +101,6 @@ export default class Routers extends EventTarget {
     }
     return this.#errors
   }
-  // get static() {
-  //   if(this.#static !== undefined) { return this.#static }
-  //   if(this.#settings.static !== undefined) {
-  //     const staticElements = []
-  //     for(const [$staticPath, $staticOptions] of this.#settings.static) {
-  //       const staticPath = path.join(process.env.PWD, $staticPath)
-  //       const staticElement = express.static(staticPath, $staticOptions)
-  //       this.express.use(staticElement)
-  //       staticElements.push([staticPath, staticElement])
-  //     }
-  //     this.#static = staticElements
-  //   }
-  //   return this.#static
-  // }
   get #watcher() {
     if(this.#_watcher !== undefined) { return this.#_watcher }
     const watchPath = `${this.source}/**/${this.#config}`
@@ -129,55 +115,55 @@ export default class Routers extends EventTarget {
     return this.#_watcher
   }
   async #add($path) {
-    const routePath = path.join(process.env.PWD, $path)
-    const routeImport = await import(routePath)
-    .then(($routeImport) => $routeImport.default)
+    const routerPath = path.join(process.env.PWD, $path)
+    const routerImport = await import(routerPath)
+    .then(($routerImport) => $routerImport.default)
     Array.prototype.push.call(
-      this, new Route(Object.assign(routeImport, {
-        fileReference: routePath
+      this, new Router(Object.assign(routerImport, {
+        fileReference: routerPath
       }), this)
     )
     return this
   }
   async #change($path) {
-    const routePath = path.join(process.env.PWD, $path).concat('?', Date.now())
-    const routeImport = await import(routePath)
-    .then(($routeImport) => $routeImport.default)
-    const [$routeIndex, $route] = this.getRoutes({ path: routeImport.path })[0]
-    if($route) {
-      $route.active = false
+    const routerPath = path.join(process.env.PWD, $path).concat('?', Date.now())
+    const routerImport = await import(routerPath)
+    .then(($routerImport) => $routerImport.default)
+    const [$routerIndex, $router] = this.getRouters({ path: routerImport.path })[0]
+    if($router) {
+      $router.active = false
       Array.prototype.splice.call(
-        this, $routeIndex, 1, new Route(Object.assign(routeImport, {
-          fileReference: routePath
+        this, $routerIndex, 1, new Router(Object.assign(routerImport, {
+          fileReference: routerPath
         }), this)
       )
     }
     return this
   }
   async #unlink($path) {
-    const routePath = path.join(process.env.PWD, $path)
-    const [$routeIndex, $route] = this.getRoutes({ fileReference: routePath })[0]
-    if($route) {
-      $route.active = false
-      Array.prototype.splice.call(this, $routeIndex, 1)
+    const routerPath = path.join(process.env.PWD, $path)
+    const [$routerIndex, $router] = this.getRouters({ fileReference: routerPath })[0]
+    if($router) {
+      $router.active = false
+      Array.prototype.splice.call(this, $routerIndex, 1)
     }
     return this
   }
-  getRoutes($filter) {
-    const routes = []
-    let routeIndex = 0
-    iterateRoutes: 
-    for(const $route of Array.from(this)) {
+  getRouters($filter) {
+    const routers = []
+    let routerIndex = 0
+    iterateRouters: 
+    for(const $router of Array.from(this)) {
       let match
       iterateFilterKeys: 
       for(const $filterKey of Object.keys($filter)) {
         if(match !== false) {
-          match = $filter[$filterKey] === $route[$filterKey]
+          match = $filter[$filterKey] === $router[$filterKey]
         }
       }
-      if(match) { routes.push([routeIndex, $route]) }
-      routeIndex++
+      if(match) { routers.push([routerIndex, $router]) }
+      routerIndex++
     }
-    return routes
+    return routers
   }
 }
