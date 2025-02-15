@@ -7,6 +7,7 @@ import https from 'node:https'
 import express from 'express'
 import browserSync from 'browser-sync'
 import { WebSocketServer } from 'ws'
+import Process from './process/index.js'
 import Router from './routers/index.js'
 import Sockets from './sockets/index.js'
 import Documents from './documents/index.js'
@@ -71,6 +72,23 @@ export default class DocumentProcessManager extends EventTarget {
     }
     return this.#server
   }
+  // BrowserSync
+  get browserSync() {
+    if(this.#browserSync !== undefined) { return this.#browserSync }
+    if(this.#settings.browserSync === undefined) return
+    const browserSyncServerOptions = recursiveAssign(this.#settings.browserSync, {
+      proxy: {
+        target: "https://".concat(
+          this.#settings.server.https.host, ":",
+          this.#settings.server.https.port,
+        ),
+      },
+    })
+    this.#browserSync = browserSync.create()
+    this.#browserSync.init(browserSyncServerOptions)
+    this.dispatchEvent(new CustomEvent('ready', { detail: this }))
+    return this.#browserSync
+  }
   // Router
   get routers() {
     if(this.#routers !== undefined) { return this.#routers }
@@ -102,22 +120,5 @@ export default class DocumentProcessManager extends EventTarget {
       this.#databases = new Databases(this.#settings.databases, this)
     }
     return this.#databases
-  }
-  // BrowserSync
-  get browserSync() {
-    if(this.#browserSync !== undefined) { return this.#browserSync }
-    if(this.#settings.browserSync === undefined) return
-    const browserSyncServerOptions = recursiveAssign(this.#settings.browserSync, {
-      proxy: {
-        target: "https://".concat(
-          this.#settings.server.https.host, ":",
-          this.#settings.server.https.port,
-        ),
-      },
-    })
-    this.#browserSync = browserSync.create()
-    this.#browserSync.init(browserSyncServerOptions)
-    this.dispatchEvent(new CustomEvent('ready', { detail: this }))
-    return this.#browserSync
   }
 }
