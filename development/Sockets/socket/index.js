@@ -1,9 +1,10 @@
+import Core from '../../Core/index.js'
 import { URL } from 'node:url'
 import { Buffer } from 'node:buffer'
 import { WebSocketServer } from 'ws'
 import MessageAdapter from './messageAdapter/index.js'
 import SocketEvent from './event/index.js'
-export default class Socket extends EventTarget {
+export default class Socket extends Core {
   #settings
   #sockets
   #webSocketServer
