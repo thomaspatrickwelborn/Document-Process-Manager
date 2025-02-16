@@ -7,7 +7,7 @@ import https from 'node:https'
 import express from 'express'
 import browserSync from 'browser-sync'
 import { WebSocketServer } from 'ws'
-import Router from './routers/index.js'
+import Routers from './routers/index.js'
 import Sockets from './sockets/index.js'
 import Documents from './documents/index.js'
 import Databases from './databases/mongo/index.js'
@@ -71,11 +71,11 @@ export default class DocumentProcessManager extends EventTarget {
     }
     return this.#server
   }
-  // Router
+  // Routers
   get routers() {
     if(this.#routers !== undefined) { return this.#routers }
     if(this.#settings.server === undefined) return
-    this.#routers = new Router(this.#settings.routers || {}, this)
+    this.#routers = new Routers(this.#settings.routers || {}, this)
     return this.#routers
   }
   // Sockets
