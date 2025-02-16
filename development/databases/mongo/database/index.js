@@ -2,12 +2,12 @@ import mongoose, { Schema } from 'mongoose'
 export default class MongoDatabase extends EventTarget {
   #settings
   #databases
+  #connection
   #active = false
   #boundConnectionConnected = this.#connectionConnected.bind(this)
   #boundConnectionDisconnected = this.#connectionDisconnected.bind(this)
   #boundConnectionError = this.#connectionError.bind(this)
-  #boundWebSocketMessage = this.#connectionMessage.bind(this)
-  constructor() {
+  constructor($settings, $databases) {
     super()
     this.#settings = $settings
     this.#databases = $databases
