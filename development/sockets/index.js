@@ -1,6 +1,6 @@
-import Processors from '../processors/index.js'
+import Processes from '../processes/index.js'
 import Socket from './socket/index.js'
-export default class Sockets extends Processors {
+export default class Sockets extends Processes {
   #server
   #boundServerUpgrade = this.#serverUpgrade.bind(this)
   constructor($settings, $dpm) {

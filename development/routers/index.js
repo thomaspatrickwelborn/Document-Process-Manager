@@ -1,7 +1,7 @@
-import Processors from '../processors/index.js'
+import Processes from '../processes/index.js'
 import express from 'express'
 import Router from './router/index.js'
-export default class Routers extends Processors {
+export default class Routers extends Processes {
   #express
   #expressRoute
   #middlewares

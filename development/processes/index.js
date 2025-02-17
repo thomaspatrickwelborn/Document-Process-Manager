@@ -1,6 +1,6 @@
 import path from 'node:path'
 import watch from 'glob-watcher'
-export default class Processors extends EventTarget {
+export default class Processes extends EventTarget {
   length = 0
   #settings
   #dpm
@@ -59,10 +59,10 @@ export default class Processors extends EventTarget {
     const processorPath = path.join(process.env.PWD, $path).concat('?', Date.now())
     const processorImport = await import(processorPath)
     .then(($processorImport) => $processorImport.default)
-    const [$processorIndex, $processor] = this.getProcessors({ path: processorImport.path })[0]
+    const [$processorIndex, $processor] = this.getProcesses({ path: processorImport.path })[0]
     $processor.active = false
     delete this[$processorIndex]
-    const splicedProcessors = Array.prototype.splice.call(this, $processorIndex, 1, new this.Class(
+    const splicedProcesses = Array.prototype.splice.call(this, $processorIndex, 1, new this.Subclass(
       Object.assign(processorImport, {
         fileReference: processorPath
       }), this
@@ -71,17 +71,17 @@ export default class Processors extends EventTarget {
   }
   async #unlink($path) {
     const processorPath = path.join(process.env.PWD, $path)
-    const [$processorIndex, $processor] = this.getProcessors({ fileReference: processorPath })[0]
+    const [$processorIndex, $processor] = this.getProcesses({ fileReference: processorPath })[0]
     if($processor) {
       $processor.active = false
       Array.prototype.splice.call(this, $processorIndex, 1)
     }
     return this
   }
-  getProcessors($filter) {
-    const processors = []
+  getProcesses($filter) {
+    const processes = []
     let processorIndex = 0
-    iterateProcessors: 
+    iterateProcesses: 
     for(const $processor of Array.from(this)) {
       let match
       iterateFilterKeys: 
@@ -90,9 +90,9 @@ export default class Processors extends EventTarget {
           match = $filter[$filterKey] === $processor[$filterKey]
         }
       }
-      if(match) { processors.push([processorIndex, $processor]) }
+      if(match) { processes.push([processorIndex, $processor]) }
       processorIndex++
     }
-    return processors
+    return processes
   }
 }
