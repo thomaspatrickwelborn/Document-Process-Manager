@@ -9,6 +9,7 @@ export default class Processes extends EventTarget {
   #boundAdd = this.#add.bind(this)
   #boundChange = this.#change.bind(this)
   #boundUnlink = this.#unlink.bind(this)
+  #_watchPaths
   #_watcher
   constructor($settings, $dpm) {
     super()
@@ -31,10 +32,18 @@ export default class Processes extends EventTarget {
     this.#target = path.join(process.env.PWD, this.#settings.target)
     return this.#target
   }
+  get #watchPaths() {
+    if(this.#_watchPaths !== undefined) { return this.#_watchPaths }
+    this.#_watchPaths = []
+    for(const $config of [].concat(this.#config)) {
+      const watchPath = `${this.source}/**/${$config}`
+      this.#_watchPaths.push(watchPath)
+    }
+    return this.#_watchPaths
+  }
   get #watcher() {
     if(this.#_watcher !== undefined) { return this.#_watcher }
-    const watchPath = `${this.source}/**/${this.#config}`
-    const watcher = watch(watchPath, {
+    const watcher = watch(this.#watchPaths, {
       ignoreInitial: false,
       awaitWriteFinish: true,
     })

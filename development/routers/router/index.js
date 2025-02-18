@@ -2,30 +2,29 @@ import path from 'node:path'
 import express from 'express'
 export default class Router extends EventTarget {
   #settings
-  #router
+  #routers
   #expressRouter
   #expressRoute
-  #source
   #middlewares
   #methods
   #errors
   #active = false
-  constructor($settings, $router) {
+  constructor($settings, $routers) {
     super()
     this.#settings = $settings
-    this.#router = $router
+    this.#routers = $routers
     this.active = this.#settings.active
   }
-  get parent() { return this.#router }
+  get parent() { return this.#routers }
   get expressRouter() {
     if(this.#expressRouter !== undefined) { return this.#expressRouter }
     this.#expressRouter = express.Router()
-    this.#router.express.use(this.#expressRouter)
+    this.#routers.express.use(this.path, this.#expressRouter)
     return this.#expressRouter
   }
   get expressRoute() {
     if(this.#expressRoute !== undefined) { return this.#expressRoute }
-    this.#expressRoute = this.expressRouter.route(this.path)
+    this.#expressRoute = this.expressRouter.route('/')
     return this.#expressRoute
   }
   get active() { return this.#active }
@@ -40,7 +39,7 @@ export default class Router extends EventTarget {
       this.expressRoute.stack.length = 0
       let layerIndex = 0
       let spliceLayers = []
-      const { stack } = this.#router.express._router
+      const { stack } = this.#routers.express._router
       for(const $layer of stack) {
         if($layer.name === 'router' && $layer.handle) {
           if($layer.handle === this.expressRouter) { spliceLayers.push(layerIndex) }
@@ -57,11 +56,6 @@ export default class Router extends EventTarget {
   }
   get name() { return this.#settings.name }
   get path() { return this.#settings.path }
-  get source() {
-    if(this.#source !== undefined) return this.#source
-    this.#source = path.join(process.env.PWD, this.#settings.source)
-    return this.#source
-  }
   get middlewares() {
     if(this.#middlewares !== undefined) { return this.#middlewares }
     if(this.#settings.middlewares !== undefined) {
@@ -81,8 +75,8 @@ export default class Router extends EventTarget {
             middleware = this.expressRouter[middlewareName](...middlewareArguments)
           }
         }
-        if(middleware) {
-          this.expressRouter.use(this.path, middleware)
+        if(middleware !== undefined) {
+          this.expressRouter.use('/', middleware)
           middlewares.push(middleware)
         }
       }
@@ -110,7 +104,7 @@ export default class Router extends EventTarget {
         let error
         if($error.length === 1 && typeof $error === 'function') {
           error = $error[0]
-          this.expressRouter.use(this.path, error)
+          this.expressRouter.use('/', error)
         }
         errors.push(error)
       }

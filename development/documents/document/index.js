@@ -73,6 +73,7 @@ export default class DPMDocument extends EventTarget {
     for(const $pilerType of PilerTypes) {
       const pilers = []
       iteratePilerSettings: 
+      if(this.#settings.pilers[$pilerType] === undefined) { continue iteratePilerTypes }
       for(const $piler of this.#settings.pilers[$pilerType]) {
         if($pilerType === 'sans') { continue iteratePilerTypes}
         this.pilers[$pilerType] = this.pilers[$pilerType] || []
