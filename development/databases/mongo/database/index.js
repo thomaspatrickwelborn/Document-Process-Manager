@@ -1,5 +1,7 @@
+import Core from '../../../core/index.js'
 import mongoose, { Schema } from 'mongoose'
-export default class MongoDatabase extends EventTarget {
+export default class MongoDatabase extends Core {
+// export default class MongoDatabase extends EventTarget {
   #settings
   #databases
   #connection
@@ -10,12 +12,10 @@ export default class MongoDatabase extends EventTarget {
   #boundConnectionError = this.#connectionError.bind(this)
   #_models
   constructor($settings, $databases) {
-    super()
-    this.#settings = $settings
-    this.#databases = $databases
-    this.active = this.#settings.active
+    super(...arguments)
+    this.active = this.settings.active
+    console.log(this)
   }
-  get parent() { return this.#databases }
   get active() { return this.#active }
   set active($active) {
     if($active === true) {
@@ -26,10 +26,10 @@ export default class MongoDatabase extends EventTarget {
     }
     this.#active = $active
   }
-  get fileReference() { return this.#settings.fileReference }
+  get fileReference() { return this.settings.fileReference }
   get path() {
     if(this.#path !== undefined) { return this.#path }
-    const { protocol, host, port, path } = this.#settings
+    const { protocol, host, port, path } = this.settings
     this.#path = [protocol, '//', host, ':', port, path].join('')
     return this.#path
   }
@@ -46,7 +46,7 @@ export default class MongoDatabase extends EventTarget {
   #connectionError($error) { console.error($error) }
   get #models() {
     iterateModels: 
-    for(const [$modelName, $schema] of this.#settings.models) {
+    for(const [$modelName, $schema] of this.settings.models) {
       if(this.connection.models[$modelName] !== undefined) { continue iterateModels }
       this.connection.model($modelName, $schema)
     }
