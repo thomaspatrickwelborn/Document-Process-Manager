@@ -54,53 +54,53 @@ export default class Processes extends EventTarget {
     return this.#_watcher
   }
   async #add($path) {
-    const processorPath = path.join(process.env.PWD, $path)
-    const processorImport = await import(processorPath)
-    .then(($processorImport) => $processorImport.default)
+    const processPath = path.join(process.env.PWD, $path)
+    const processImport = await import(processPath)
+    .then(($processImport) => $processImport.default)
     Array.prototype.push.call(this, new this.Subclass(
-      Object.assign(processorImport, {
-        fileReference: processorPath
+      Object.assign(processImport, {
+        fileReference: processPath
       }), this
     ))
     return this
   }
   async #change($path) {
-    const processorPath = path.join(process.env.PWD, $path).concat('?', Date.now())
-    const processorImport = await import(processorPath)
-    .then(($processorImport) => $processorImport.default)
-    const [$processorIndex, $processor] = this.getProcesses({ path: processorImport.path })[0]
-    $processor.active = false
-    delete this[$processorIndex]
-    const splicedProcesses = Array.prototype.splice.call(this, $processorIndex, 1, new this.Subclass(
-      Object.assign(processorImport, {
-        fileReference: processorPath
+    const processPath = path.join(process.env.PWD, $path).concat('?', Date.now())
+    const processImport = await import(processPath)
+    .then(($processImport) => $processImport.default)
+    const [$processIndex, $process] = this.getProcesses({ path: processImport.path })[0]
+    $process.active = false
+    delete this[$processIndex]
+    const splicedProcesses = Array.prototype.splice.call(this, $processIndex, 1, new this.Subclass(
+      Object.assign(processImport, {
+        fileReference: processPath
       }), this
     ))
     return this
   }
   async #unlink($path) {
-    const processorPath = path.join(process.env.PWD, $path)
-    const [$processorIndex, $processor] = this.getProcesses({ fileReference: processorPath })[0]
-    if($processor) {
-      $processor.active = false
-      Array.prototype.splice.call(this, $processorIndex, 1)
+    const processPath = path.join(process.env.PWD, $path)
+    const [$processIndex, $process] = this.getProcesses({ fileReference: processPath })[0]
+    if($process) {
+      $process.active = false
+      Array.prototype.splice.call(this, $processIndex, 1)
     }
     return this
   }
   getProcesses($filter) {
     const processes = []
-    let processorIndex = 0
+    let processIndex = 0
     iterateProcesses: 
-    for(const $processor of Array.from(this)) {
+    for(const $process of Array.from(this)) {
       let match
       iterateFilterKeys: 
       for(const $filterKey of Object.keys($filter)) {
         if(match !== false) {
-          match = $filter[$filterKey] === $processor[$filterKey]
+          match = $filter[$filterKey] === $process.settings[$filterKey]
         }
       }
-      if(match) { processes.push([processorIndex, $processor]) }
-      processorIndex++
+      if(match) { processes.push([processIndex, $process]) }
+      processIndex++
     }
     return processes
   }

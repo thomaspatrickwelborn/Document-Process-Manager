@@ -2,10 +2,8 @@ import { expandEvents, recursiveAssign } from '../coutil/index.js'
 import CoreClassEvents from './propertyEvents/index.js'
 import CoreEvent from './event/index.js'
 import Settings from './settings/index.js' 
-// import Options from './options/index.js' 
 export default class Core extends EventTarget {
   #settings
-  // #options
   #events
   #parent
   #_propertyClassEvents
@@ -30,11 +28,6 @@ export default class Core extends EventTarget {
     if(this.#settings !== undefined) return
     this.#settings = Object.assign({}, Settings, $settings)
   }
-  // get options() { return this.#options }
-  // set options($options) {
-  //   if(this.#options !== undefined) return
-  //   this.#options = recursiveAssign(structuredClone(Options), $options)
-  // }
   get parent() {
     if(this.#parent !== undefined) return this.#parent
     this.#parent = (

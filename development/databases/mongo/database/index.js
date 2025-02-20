@@ -1,9 +1,6 @@
-import Core from '../../../core/index.js'
 import mongoose, { Schema } from 'mongoose'
+import Core from '../../../core/index.js'
 export default class MongoDatabase extends Core {
-// export default class MongoDatabase extends EventTarget {
-  #settings
-  #databases
   #connection
   #path
   #active = false
@@ -14,7 +11,6 @@ export default class MongoDatabase extends Core {
   constructor($settings, $databases) {
     super(...arguments)
     this.active = this.settings.active
-    console.log(this)
   }
   get active() { return this.#active }
   set active($active) {

@@ -3,9 +3,8 @@ import { Buffer } from 'node:buffer'
 import { WebSocketServer } from 'ws'
 import MessageAdapter from './messageAdapter/index.js'
 import SocketEvent from './event/index.js'
-export default class Socket extends EventTarget {
-  #settings
-  #sockets
+import Core from '../../core/index.js'
+export default class Socket extends Core {
   #webSocketServer
   #_webSocket
   #active = false
@@ -18,12 +17,9 @@ export default class Socket extends EventTarget {
   #boundWebSocketServerError = this.#webSocketServerError.bind(this)
   #boundWebSocketMessage = this.#webSocketMessage.bind(this)
   constructor($settings, $sockets) {
-    super()
-    this.#settings = $settings
-    this.#sockets = $sockets
-    this.active = this.#settings.active
+    super(...arguments)
+    this.active = this.settings.active
   }
-  get parent() { return this.#sockets }
   get active() { return this.#active }
   set active($active) {
     if($active === true) {
@@ -34,8 +30,8 @@ export default class Socket extends EventTarget {
     }
     this.#active = $active
   }
-  get fileReference() { return this.#settings.fileReference }
-  get path() { return this.#settings.path }
+  get fileReference() { return this.settings.fileReference }
+  get path() { return this.settings.path }
   get webSocketServer() {
     if(this.#webSocketServer !== undefined) { return this.#webSocketServer }
     this.#webSocketServer = new WebSocketServer({
@@ -66,19 +62,19 @@ export default class Socket extends EventTarget {
   #webSocketServerError($error) { console.error($error) }
   get #webSocketOpen() {
     if(this.#_webSocketOpen !== undefined) { return this.#_webSocketOpen }
-    this.#_webSocketOpen = this.#settings.open || function webSocketOpen($event) { }
+    this.#_webSocketOpen = this.settings.open || function webSocketOpen($event) { }
     this.#_webSocketOpen = this.#_webSocketOpen.bind(this)
     return this.#_webSocketOpen
   }
   get #webSocketClose() {
     if(this.#_webSocketClose !== undefined) { return this.#_webSocketClose }
-    this.#_webSocketClose = this.#settings.close || function webSocketClose($event) { }
+    this.#_webSocketClose = this.settings.close || function webSocketClose($event) { }
     this.#_webSocketClose = this.#_webSocketClose.bind(this)
     return this.#_webSocketClose
   }
   get #webSocketError() {
     if(this.#_webSocketError !== undefined) { return this.#_webSocketError }
-    this.#_webSocketError = this.#settings.error || function webSocketError($error) { console.error($error) }
+    this.#_webSocketError = this.settings.error || function webSocketError($error) { console.error($error) }
     this.#_webSocketError = this.#_webSocketError.bind(this)
     return this.#_webSocketError
   }
@@ -97,7 +93,7 @@ export default class Socket extends EventTarget {
   get messageAdapters() {
     if(this.#messageAdapters !== undefined) { return this.#messageAdapters }
     const messageAdapters = []
-    for(const $adapter of this.#settings.messageAdapters) {
+    for(const $adapter of this.settings.messageAdapters) {
       let adapter
       if($adapter instanceof MessageAdapter) { adapter = adapter }
       else { adapter = new MessageAdapter($adapter, this) }
