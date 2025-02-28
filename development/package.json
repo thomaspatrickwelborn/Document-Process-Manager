@@ -5,19 +5,19 @@
   "license": "ISC",
   "type": "module",
   "main": "index.js",
-  "dependencies": {
+  "devDependencies": {
     "browser-sync": "^3.0.3",
-    "core-plex": "^1.1.7",
+    "core-plex": "^1.1.8",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
-    "glob": "^11.0.0",
+    "glob": "^11.0.1",
     "glob-watcher": "^6.0.0",
-    "js-beautify": "^1.15.1",
+    "js-beautify": "^1.15.4",
     "micromatch": "^4.0.8",
-    "mongoose": "^8.10.0",
-    "nodemon": "^3.1.5",
-    "rollup": "^4.22.0",
-    "sass": "^1.79.1",
-    "ws": "^8.18.0"
+    "mongoose": "^8.11.0",
+    "nodemon": "^3.1.9",
+    "rollup": "^4.34.8",
+    "sass": "^1.85.1",
+    "ws": "^8.18.1"
   }
 }

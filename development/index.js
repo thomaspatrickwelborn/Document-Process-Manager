@@ -22,6 +22,7 @@ export default class DocumentProcessManager extends Core {
   #sockets
   #documents
   #databases
+  static propertyClasses = [{}]
   constructor($settings, $options) {
     super(...arguments)
     this.inspector
