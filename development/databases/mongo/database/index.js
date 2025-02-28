@@ -1,17 +1,35 @@
 import mongoose, { Schema } from 'mongoose'
-import Core from '../../../core/index.js'
+import { Core } from 'core-plex'
 export default class MongoDatabase extends Core {
   #connection
   #path
+  #parent
   #active = false
   #boundConnectionConnected = this.#connectionConnected.bind(this)
-  #boundConnectionDisconnected = this.#connectionDisconnected.bind(this)
+  #boundConnectionClose = this.#connectionClose.bind(this)
   #boundConnectionError = this.#connectionError.bind(this)
   #_models
-  constructor($settings, $databases) {
-    super(...arguments)
+  static propertyClasses = [{
+    Name: "connection",
+    Events: { Assign: "on", Deassign: "off" },
+    Names: {
+      Monople: { Formal: "Connection", Nonformal: "connection" },
+    },
+  }]
+  constructor($settings, $options, $parent) {
+    super(Object.assign({
+      propertyClasses: MongoDatabase.propertyClasses,
+    }, $settings), $options)
+    this.#parent = $parent
+    this.addEvents({
+      'connection connected': this.#boundConnectionConnected,
+      'connection close': this.#boundConnectionClose,
+      'connection error': this.#boundConnectionError,
+    })
+    this.enableEvents()
     this.active = this.settings.active
   }
+  get parent() { return this.#parent }
   get active() { return this.#active }
   set active($active) {
     if($active === true) {
@@ -32,13 +50,10 @@ export default class MongoDatabase extends Core {
   get connection() {
     if(this.#connection !== undefined) { return this.#connection }
     this.#connection = mongoose.createConnection(this.path, this.options)
-    this.#connection.on('connected', this.#boundConnectionConnected)
-    this.#connection.on('close', this.#boundConnectionDisconnected)
-    this.#connection.on('error', this.#boundConnectionError)
     return this.#connection
   }
-  #connectionConnected() { this.#models }
-  #connectionDisconnected() { this.#connection = undefined  }
+  #connectionConnected($event) { this.#models }
+  #connectionClose($event) { this.#connection = undefined }
   #connectionError($error) { console.error($error) }
   get #models() {
     iterateModels: 

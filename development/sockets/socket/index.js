@@ -3,10 +3,10 @@ import { Buffer } from 'node:buffer'
 import { WebSocketServer } from 'ws'
 import MessageAdapter from './messageAdapter/index.js'
 import SocketEvent from './event/index.js'
-import Core from '../../core/index.js'
+import { Core } from 'core-plex'
 export default class Socket extends Core {
   #webSocketServer
-  #_webSocket
+  #webSocket
   #active = false
   #messageAdapters
   #_webSocketOpen
@@ -16,10 +16,38 @@ export default class Socket extends Core {
   #boundWebSocketServerClose = this.#webSocketServerClose.bind(this)
   #boundWebSocketServerError = this.#webSocketServerError.bind(this)
   #boundWebSocketMessage = this.#webSocketMessage.bind(this)
-  constructor($settings, $sockets) {
-    super(...arguments)
+  #parent
+  static propertyClasses = [{
+    Name: "webSocketServer",
+    Events: { Assign: "on", Deassign: "off" },
+    Names: {
+      Monople: { Formal: "WebSocketServer", Nonformal: "webSocketServer" },
+    },
+  },
+  {
+    Name: "webSocket",
+    Events: { Assign: "on", Deassign: "off" },
+    Names: {
+      Monople: { Formal: "WebSocket", Nonformal: "webSocket" },
+    },
+  }]
+  constructor($settings, $options, $parent) {
+    super(Object.assign({}, $settings, {
+      propertyClasses: Socket.propertyClasses,
+    }))
+    this.#parent = $parent
+    this.addEvents({
+      'webSocketServer connection': this.#boundWebSocketServerConnection,
+      'webSocketServer close': this.#boundWebSocketServerClose,
+      'webSocketServer error': this.#boundWebSocketServerError,
+      'webSocket message': this.#boundWebSocketMessage,
+      'webSocket error': this.#webSocketError,
+      'webSocket open': this.#webSocketOpen,
+      'webSocket close': this.#webSocketClose,
+    })
     this.active = this.settings.active
   }
+  get parent() { return this.#parent }
   get active() { return this.#active }
   set active($active) {
     if($active === true) {
@@ -38,24 +66,18 @@ export default class Socket extends Core {
       path: this.path,
       noServer: true,
     })
-    this.#webSocketServer.on('connection', this.#boundWebSocketServerConnection)
-    this.#webSocketServer.on('close', this.#boundWebSocketServerClose)
-    this.#webSocketServer.on('error', this.#boundWebSocketServerError)
+    this.enableEvents({ path: 'webSocketServer' })
     return this.#webSocketServer
   }
-  get #webSocket() { return this.#_webSocket }
-  set #webSocket($webSocket) {
-    if($webSocket === undefined) { this.#_webSocket = undefined }
-    else {
-      this.#_webSocket = $webSocket
-      this.#_webSocket.on('message', this.#boundWebSocketMessage)
-      this.#_webSocket.on('error', this.#webSocketError)
-      this.#_webSocket.on('open', this.#webSocketOpen)
-      this.#_webSocket.on('close', this.#webSocketClose)
-    }
+  get webSocket() { return this.#webSocket }
+  set webSocket($webSocket) {
+    if(this.#webSocket !== undefined) { return }
+    this.#webSocket = $webSocket
+    this.enableEvents({ path: 'webSocket' })
   }
   #webSocketServerConnection($ws) { this.#webSocket = $ws }
   #webSocketServerClose() {
+    this.disableEvents({})
     this.#webSocketServer = undefined 
     this.#webSocket = undefined
   }
@@ -83,7 +105,7 @@ export default class Socket extends Core {
     for(const $messageAdapter of this.messageAdapters) {
       try {
         const message = $messageAdapter.message($data, $isBinary)
-        const { type, detail } = message(this.#webSocket, $data, $isBinary)
+        const { type, detail } = message(this.webSocket, $data, $isBinary)
         const messageEvent = new SocketEvent(type, { detail, message: $data, isBinary: $isBinary })
         this.dispatchEvent(messageEvent)
       }
@@ -102,5 +124,5 @@ export default class Socket extends Core {
     this.#messageAdapters = messageAdapters
     return this.#messageAdapters
   }
-  send() { this.#webSocket.send(...arguments) }
+  send() { this.webSocket.send(...arguments) }
 }

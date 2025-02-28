@@ -3,17 +3,16 @@ import Socket from './socket/index.js'
 export default class Sockets extends Processes {
   #server
   #boundServerUpgrade = this.#serverUpgrade.bind(this)
-  constructor($settings, $dpm) {
+  constructor($settings, $options, $parent) {
     super(Object.assign({
       Subclass: Socket
-    }, $settings), $dpm)
-    this.server
+    }, $settings), $options, $parent)
   }
   get server() {
     if(this.#server !== undefined) return this.#server
-    this.#server = this.dpm.server
+    this.#server = this.parent.server
     this.#server.on('upgrade', this.#boundServerUpgrade)
-    return this.dpm.server
+    return this.parent.server
   }
   #serverUpgrade($request, $socket, $head) {
     iterateSockets: 

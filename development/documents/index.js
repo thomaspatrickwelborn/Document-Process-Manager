@@ -1,9 +1,9 @@
 import Processes from '../processes/index.js'
 import DPMDocument from './document/index.js'
 export default class Documents extends Processes {
-  constructor($settings, $dpm) {
+  constructor($settings, $options, $parent) {
     super(Object.assign({
       Subclass: DPMDocument
-    }, $settings), $dpm)
+    }, $settings), $options, $parent)
   }
 }

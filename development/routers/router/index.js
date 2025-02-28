@@ -1,6 +1,6 @@
 import path from 'node:path'
 import express from 'express'
-import Core from '../../core/index.js'
+import { Core } from 'core-plex'
 export default class Router extends Core {
   #expressRouter
   #expressRoute
@@ -8,10 +8,13 @@ export default class Router extends Core {
   #methods
   #errors
   #active = false
-  constructor($settings, $routers) {
+  #parent
+  constructor($settings, $options, $parent) {
     super(...arguments)
+    this.#parent = $parent
     this.active = this.settings.active
   }
+  get parent() { return this.#parent }
   get expressRouter() {
     if(this.#expressRouter !== undefined) { return this.#expressRouter }
     this.#expressRouter = express.Router()

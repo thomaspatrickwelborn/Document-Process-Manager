@@ -7,10 +7,10 @@ export default class Routers extends Processes {
   #middlewares
   #methods
   #errors
-  constructor($settings, $dpm) {
+  constructor($settings, $options, $parent) {
     super(Object.assign({
       Subclass: Router
-    }, $settings), $dpm)
+    }, $settings), $options, $parent)
     this.middlewares
     this.methods
     this.errors

@@ -1,9 +1,10 @@
+import { Core } from 'core-plex'
 import path from 'node:path'
 import watch from 'glob-watcher'
-export default class Processes extends EventTarget {
+export default class Processes extends Core {
   length = 0
   #settings
-  #dpm
+  #parent
   #source
   #target
   #boundAdd = this.#add.bind(this)
@@ -11,25 +12,22 @@ export default class Processes extends EventTarget {
   #boundUnlink = this.#unlink.bind(this)
   #_watchPaths
   #_watcher
-  constructor($settings, $dpm) {
-    super()
-    this.#settings = $settings
-    this.#dpm = $dpm
+  constructor($settings, $options, $parent) {
+    super(...arguments)
+    this.#parent = $parent
     this.#watcher
   }
-  get Subclass() { return this.#settings.Subclass }
-  get settings() { return this.#settings }
-  get dpm() { return this.#dpm }
-  get parent() { return this.dpm }
-  get #config() { return this.#settings.config }
+  get Subclass() { return this.settings.Subclass }
+  get parent() { return this.#parent }
+  get #config() { return this.settings.config }
   get source() {
-    if(this.#settings.source !== undefined) return this.#settings.source
-    this.#source = path.join(process.env.PWD, this.#settings.source)
+    if(this.settings.source !== undefined) return this.settings.source
+    this.#source = path.join(process.env.PWD, this.settings.source)
     return this.#source
   }
   get target() {
-    if(this.#settings.target !== undefined) return this.#settings.target
-    this.#target = path.join(process.env.PWD, this.#settings.target)
+    if(this.settings.target !== undefined) return this.settings.target
+    this.#target = path.join(process.env.PWD, this.settings.target)
     return this.#target
   }
   get #watchPaths() {
@@ -60,7 +58,7 @@ export default class Processes extends EventTarget {
     Array.prototype.push.call(this, new this.Subclass(
       Object.assign(processImport, {
         fileReference: processPath
-      }), this
+      }), {}, this
     ))
     return this
   }
@@ -74,7 +72,7 @@ export default class Processes extends EventTarget {
     const splicedProcesses = Array.prototype.splice.call(this, $processIndex, 1, new this.Subclass(
       Object.assign(processImport, {
         fileReference: processPath
-      }), this
+      }), {}, this
     ))
     return this
   }

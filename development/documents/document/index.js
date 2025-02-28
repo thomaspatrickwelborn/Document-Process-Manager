@@ -1,7 +1,7 @@
 import * as Pilers from '../../pilers/index.js'
 import path from 'node:path'
 import { rm } from 'node:fs/promises'
-import Core from '../../core/index.js'
+import { Core } from 'core-plex'
 const PilerTypes = [
   'sans',
   'simules',
@@ -15,12 +15,15 @@ export default class DPMDocument extends Core {
   #target
   #ignore
   #active = false
-  constructor($settings, $documents) {
+  #parent
+  constructor($settings, $options, $parent) {
     super(...arguments)
+    this.#parent = $parent
     this.#depile().then(($depile) => {
       this.active = this.settings.active
     })
   }
+  get parent() { return this.#parent }
   get active() { return this.#active }
   set active($active) {
     let { promise, resolve, reject } = Promise.withResolvers()
