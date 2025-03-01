@@ -20,16 +20,10 @@ export default class Socket extends Core {
   static propertyClasses = [{
     Name: "webSocketServer",
     Events: { Assign: "on", Deassign: "off" },
-    Names: {
-      Monople: { Formal: "WebSocketServer", Nonformal: "webSocketServer" },
-    },
   },
   {
     Name: "webSocket",
     Events: { Assign: "on", Deassign: "off" },
-    Names: {
-      Monople: { Formal: "WebSocket", Nonformal: "webSocket" },
-    },
   }]
   constructor($settings, $options, $parent) {
     super(Object.assign({}, $settings, {
@@ -45,6 +39,7 @@ export default class Socket extends Core {
       'webSocket open': this.#webSocketOpen,
       'webSocket close': this.#webSocketClose,
     })
+    this.enableEvents()
     this.active = this.settings.active
   }
   get parent() { return this.#parent }

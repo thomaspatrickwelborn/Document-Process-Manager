@@ -7,6 +7,7 @@ export default class Sockets extends Processes {
     super(Object.assign({
       Subclass: Socket
     }, $settings), $options, $parent)
+    this.server
   }
   get server() {
     if(this.#server !== undefined) return this.#server

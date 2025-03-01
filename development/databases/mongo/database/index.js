@@ -12,9 +12,6 @@ export default class MongoDatabase extends Core {
   static propertyClasses = [{
     Name: "connection",
     Events: { Assign: "on", Deassign: "off" },
-    Names: {
-      Monople: { Formal: "Connection", Nonformal: "connection" },
-    },
   }]
   constructor($settings, $options, $parent) {
     super(Object.assign({
