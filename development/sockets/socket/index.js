@@ -9,37 +9,98 @@ export default class Socket extends Core {
   #webSocket
   #active = false
   #messageAdapters
-  #_webSocketOpen
-  #_webSocketClose
-  #_webSocketError
-  #boundWebSocketServerConnection = this.#webSocketServerConnection.bind(this)
-  #boundWebSocketServerClose = this.#webSocketServerClose.bind(this)
-  #boundWebSocketServerError = this.#webSocketServerError.bind(this)
-  #boundWebSocketMessage = this.#webSocketMessage.bind(this)
   #parent
-  static propertyClasses = [{
-    Name: "webSocketServer",
-    Events: { Assign: "on", Deassign: "off" },
-  },
-  {
-    Name: "webSocket",
-    Events: { Assign: "on", Deassign: "off" },
-  }]
+  static propertyClasses = []
   constructor($settings, $options, $parent) {
     super(Object.assign({}, $settings, {
       propertyClasses: Socket.propertyClasses,
     }))
     this.#parent = $parent
-    this.addEvents({
-      'webSocketServer connection': this.#boundWebSocketServerConnection,
-      'webSocketServer close': this.#boundWebSocketServerClose,
-      'webSocketServer error': this.#boundWebSocketServerError,
-      'webSocket message': this.#boundWebSocketMessage,
-      'webSocket error': this.#webSocketError,
-      'webSocket open': this.#webSocketOpen,
-      'webSocket close': this.#webSocketClose,
+    this.addEvents([
+      // Web Socket Server Events
+      {
+        path: 'webSocketServer', type: 'connection',
+        listener: function webSocketServerConnection($ws) {
+          this.#webSocket = undefined
+          this.webSocket = $ws
+        }.bind(this),
+        target: { assign: 'on', deassign: 'off' },
+      },
+      { 
+        path: 'webSocketServer', type: 'close',
+        listener: function webSocketServerClose() {
+          this.#webSocketServer = undefined 
+          this.#webSocket = undefined
+        },
+        target: { assign: 'on', deassign: 'off' },
+      },
+      { 
+        path: 'webSocketServer', type: 'error',
+        listener: function webSocketServerError($error) { console.error($error) },
+        target: { assign: 'on', deassign: 'off' },
+      },
+      // Web Socket Events
+      { 
+        path: 'webSocket', type: 'message',
+        listener: function webSocketMessage($data, $isBinary) {
+          iterateAdapters: 
+          for(const $messageAdapter of this.messageAdapters) {
+            try {
+              const message = $messageAdapter.message($data, $isBinary)
+              const { type, detail } = message(this.webSocket, $data, $isBinary)
+              const messageEvent = new SocketEvent(type, { detail, message: $data, isBinary: $isBinary })
+              this.dispatchEvent(messageEvent)
+            }
+            catch($err) { /* console.error($err) */ }
+          }
+        },
+        target: { assign: 'on', deassign: 'off' },
+      },
+      { 
+        path: 'webSocket', type: 'error',
+        listener: 
+          this.settings?.error.bind(this) ||
+          function webSocketError($error) { console.error($error) }.bind(this),
+        target: { assign: 'on', deassign: 'off' },
+      },
+      { 
+        path: 'webSocket', type: 'open',
+        listener: 
+          this.settings?.open.bind(this) || 
+          function webSocketOpen($event) { }.bind(this),
+        target: { assign: 'on', deassign: 'off' },
+      },
+      { 
+        path: 'webSocket', type: 'close',
+        listener: 
+          this.settings?.close.bind(this) ||
+          function webSocketClose($event) { }.bind(this),
+        target: { assign: 'on', deassign: 'off' },
+      },
+    ])
+    Object.defineProperties(this, {
+      webSocketServer: {
+        enumerable: true,
+        get() {
+          if(this.#webSocketServer !== undefined) { return this.#webSocketServer }
+          this.#webSocketServer = new WebSocketServer({
+            path: this.path,
+            noServer: true,
+          })
+          this.reenableEvents({ path: 'webSocketServer' })
+          return this.#webSocketServer
+        },
+      }, 
+      webSocket: {
+        enumerable: true,
+        get() { return this.#webSocket },
+        set($webSocket) {
+          if(this.#webSocket !== undefined) { return }
+          this.#webSocket = $webSocket
+          this.reenableEvents({ path: 'webSocket' })
+        },
+      },
     })
-    this.enableEvents()
     this.active = this.settings.active
   }
   get parent() { return this.#parent }
@@ -55,58 +116,6 @@ export default class Socket extends Core {
   }
   get fileReference() { return this.settings.fileReference }
   get path() { return this.settings.path }
-  get webSocketServer() {
-    if(this.#webSocketServer !== undefined) { return this.#webSocketServer }
-    this.#webSocketServer = new WebSocketServer({
-      path: this.path,
-      noServer: true,
-    })
-    this.enableEvents({ path: 'webSocketServer' })
-    return this.#webSocketServer
-  }
-  get webSocket() { return this.#webSocket }
-  set webSocket($webSocket) {
-    if(this.#webSocket !== undefined) { return }
-    this.#webSocket = $webSocket
-    this.enableEvents({ path: 'webSocket' })
-  }
-  #webSocketServerConnection($ws) { this.#webSocket = $ws }
-  #webSocketServerClose() {
-    this.disableEvents({})
-    this.#webSocketServer = undefined 
-    this.#webSocket = undefined
-  }
-  #webSocketServerError($error) { console.error($error) }
-  get #webSocketOpen() {
-    if(this.#_webSocketOpen !== undefined) { return this.#_webSocketOpen }
-    this.#_webSocketOpen = this.settings.open || function webSocketOpen($event) { }
-    this.#_webSocketOpen = this.#_webSocketOpen.bind(this)
-    return this.#_webSocketOpen
-  }
-  get #webSocketClose() {
-    if(this.#_webSocketClose !== undefined) { return this.#_webSocketClose }
-    this.#_webSocketClose = this.settings.close || function webSocketClose($event) { }
-    this.#_webSocketClose = this.#_webSocketClose.bind(this)
-    return this.#_webSocketClose
-  }
-  get #webSocketError() {
-    if(this.#_webSocketError !== undefined) { return this.#_webSocketError }
-    this.#_webSocketError = this.settings.error || function webSocketError($error) { console.error($error) }
-    this.#_webSocketError = this.#_webSocketError.bind(this)
-    return this.#_webSocketError
-  }
-  #webSocketMessage($data, $isBinary) {
-    iterateAdapters: 
-    for(const $messageAdapter of this.messageAdapters) {
-      try {
-        const message = $messageAdapter.message($data, $isBinary)
-        const { type, detail } = message(this.webSocket, $data, $isBinary)
-        const messageEvent = new SocketEvent(type, { detail, message: $data, isBinary: $isBinary })
-        this.dispatchEvent(messageEvent)
-      }
-      catch($err) { /* console.log($err) */ }
-    }
-  }
   get messageAdapters() {
     if(this.#messageAdapters !== undefined) { return this.#messageAdapters }
     const messageAdapters = []

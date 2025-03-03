@@ -11,18 +11,30 @@ export default class MongoDatabase extends Core {
   #_models
   static propertyClasses = [{
     Name: "connection",
-    Events: { Assign: "on", Deassign: "off" },
+    // Events: { Assign: "on", Deassign: "off" },
   }]
   constructor($settings, $options, $parent) {
     super(Object.assign({
       propertyClasses: MongoDatabase.propertyClasses,
     }, $settings), $options)
     this.#parent = $parent
-    this.addEvents({
-      'connection connected': this.#boundConnectionConnected,
-      'connection close': this.#boundConnectionClose,
-      'connection error': this.#boundConnectionError,
-    })
+    this.addEvents([
+      {
+        path: 'connection', type: 'connected', 
+        listener: this.#boundConnectionConnected,
+        target: { assign: 'on', deassign: 'off' },
+      },
+      {
+        path: 'connection', type: 'close', 
+        listener: this.#boundConnectionClose,
+        target: { assign: 'on', deassign: 'off' },
+      },
+      {
+        path: 'connection', type: 'error', 
+        listener: this.#boundConnectionError,
+        target: { assign: 'on', deassign: 'off' },
+      }
+    ])
     this.enableEvents()
     this.active = this.settings.active
   }
