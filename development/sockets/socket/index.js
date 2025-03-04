@@ -14,7 +14,7 @@ export default class Socket extends Core {
   constructor($settings, $options, $parent) {
     super(Object.assign({}, $settings, {
       propertyClasses: Socket.propertyClasses,
-    }))
+    }), $options)
     this.#parent = $parent
     this.addEvents([
       // Web Socket Server Events

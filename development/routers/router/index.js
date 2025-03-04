@@ -65,8 +65,8 @@ export default class Router extends Core {
           middleware = $middleware[0]
         }
         else {
-          const middlewareName = $middleware.splice(0, 1)[0]
-          const middlewareArguments = $middleware.flat()
+          const middlewareName = $middleware[0]
+          const middlewareArguments = $middleware[1]
           if(['json', 'static', 'urlencoded'].includes(middlewareName)) {
             middleware = express[middlewareName](...middlewareArguments)
           }

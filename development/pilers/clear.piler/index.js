@@ -24,11 +24,9 @@ export default class ClearPiler extends Piler {
   get ignore() {
     if(this.#ignore !== undefined) { return this.#ignore }
     this.#ignore = Array.prototype.concat(
-      // Settings - Ignore
       this.settings.ignore.map(
         ($ignorePath) => path.join(this.target, $ignorePath)
       ),
-      // Route - Ignore
       this.document.ignore
     )
     return this.#ignore

@@ -14,7 +14,6 @@ export default class EJSPiler extends Piler {
   #_root
   constructor($settings, $options, $document) {
     super(...arguments)
-    // this.watcher
   }
   get outputType() { return this.settings.outputType }
   get model() {

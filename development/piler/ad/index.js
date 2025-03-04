@@ -13,6 +13,7 @@ export default class Adpiler extends Core {
     super(...arguments)
     this.document = $document
     this.addEvents([
+      // Watcher Events
       {
         path: 'watcher', type: 'add',
         listener: this.pile.bind(this),

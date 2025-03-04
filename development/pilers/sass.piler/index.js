@@ -7,7 +7,6 @@ import OutputOptions from './OutputOptions.js'
 export default class SASSPiler extends Piler {
   constructor() {
     super(...arguments)
-    // this.watcher
   }
   async pile($path) {
     await createDir(this.output)

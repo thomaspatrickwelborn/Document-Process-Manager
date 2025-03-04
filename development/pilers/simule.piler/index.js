@@ -6,7 +6,6 @@ import { cp, mkdir } from 'node:fs/promises'
 export default class SimulePiler extends Piler {
   constructor() {
     super(...arguments)
-    // this.watcher
   }
   async pile($path) {
     if(micromatch($path, this.input)) {

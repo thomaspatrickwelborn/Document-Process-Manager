@@ -12,7 +12,6 @@ export default class RollupPiler extends Piler{
   #outputOptions
   constructor() {
     super(...arguments)
-    // this.watcher
   }
   get inputOptions() {
     if(
