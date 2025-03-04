@@ -7,7 +7,7 @@ import OutputOptions from './OutputOptions.js'
 export default class SASSPiler extends Piler {
   constructor() {
     super(...arguments)
-    this.watcher
+    // this.watcher
   }
   async pile($path) {
     await createDir(this.output)
@@ -34,6 +34,6 @@ export default class SASSPiler extends Piler {
       await writeFile(sassFileSourceMapPath, sassFileSourceMap)
       return sassFileCSS
     }
-    catch($err) { console.log($err) }
+    catch($err) { console.error($err) }
   }
 }

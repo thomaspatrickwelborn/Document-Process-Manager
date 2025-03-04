@@ -1,25 +1,21 @@
+import { Core } from 'core-plex'
 import path from 'node:path'
-import watch from 'glob-watcher'
-export default class Deadpiler extends EventTarget {
-  settings
+export default class Deadpiler extends Core {
   document
   #ignore
   #path
   #boundPile = this.pile.bind(this)
-  constructor($settings, $document) {
-    super()
-    this.settings = $settings
+  constructor($settings, $options, $document) {
+    super(...arguments)
     this.document = $document
   }
   get type() { return this.settings.type }
   get ignore() {
     if(this.#ignore !== undefined) { return this.#ignore }
     this.#ignore = Array.prototype.concat(
-      // Settings - Ignore
       this.settings.ignore.map(
         ($ignorePath) => path.join(this.document.source, $ignorePath)
       ),
-      // Route - Ignore
       this.document.ignore
     )
     return this.#ignore

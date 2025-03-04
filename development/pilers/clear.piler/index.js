@@ -6,7 +6,7 @@ export default class ClearPiler extends Piler {
   #target
   #path
   #ignore
-  constructor() {
+  constructor($settings, $options, $document) {
     super(...arguments)
   }
   get target() {

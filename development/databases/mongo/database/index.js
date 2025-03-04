@@ -5,33 +5,27 @@ export default class MongoDatabase extends Core {
   #path
   #parent
   #active = false
-  #boundConnectionConnected = this.#connectionConnected.bind(this)
-  #boundConnectionClose = this.#connectionClose.bind(this)
-  #boundConnectionError = this.#connectionError.bind(this)
   #_models
-  static propertyClasses = [{
-    Name: "connection",
-    // Events: { Assign: "on", Deassign: "off" },
-  }]
   constructor($settings, $options, $parent) {
     super(Object.assign({
       propertyClasses: MongoDatabase.propertyClasses,
     }, $settings), $options)
     this.#parent = $parent
     this.addEvents([
+      // Connection Events
       {
         path: 'connection', type: 'connected', 
-        listener: this.#boundConnectionConnected,
+        listener: function connectionConnected($event) { this.#models }.bind(this),
         target: { assign: 'on', deassign: 'off' },
       },
       {
         path: 'connection', type: 'close', 
-        listener: this.#boundConnectionClose,
+        listener: function connectionClose($event) { this.#connection = undefined }.bind(this),
         target: { assign: 'on', deassign: 'off' },
       },
       {
         path: 'connection', type: 'error', 
-        listener: this.#boundConnectionError,
+        listener: function connectionError($error) { console.error($error) }.bind(this),
         target: { assign: 'on', deassign: 'off' },
       }
     ])
@@ -61,9 +55,6 @@ export default class MongoDatabase extends Core {
     this.#connection = mongoose.createConnection(this.path, this.options)
     return this.#connection
   }
-  #connectionConnected($event) { this.#models }
-  #connectionClose($event) { this.#connection = undefined }
-  #connectionError($error) { console.error($error) }
   get #models() {
     iterateModels: 
     for(const [$modelName, $schema] of this.settings.models) {

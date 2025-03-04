@@ -6,7 +6,7 @@ import { cp, mkdir } from 'node:fs/promises'
 export default class SimulePiler extends Piler {
   constructor() {
     super(...arguments)
-    this.watcher
+    // this.watcher
   }
   async pile($path) {
     if(micromatch($path, this.input)) {
@@ -20,7 +20,7 @@ export default class SimulePiler extends Piler {
             recursive: true,
           })
         }
-        catch($err) { console.log($err) }
+        catch($err) { console.error($err) }
       }
       else if(this.settings.outputType === 'glob') {
         try {
@@ -35,7 +35,7 @@ export default class SimulePiler extends Piler {
             recursive: true,
           })
         }
-        catch($err) { console.log($err) }
+        catch($err) { console.error($err) }
       }
     }
   }

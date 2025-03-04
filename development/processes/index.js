@@ -7,15 +7,78 @@ export default class Processes extends Core {
   #parent
   #source
   #target
-  #boundAdd = this.#add.bind(this)
-  #boundChange = this.#change.bind(this)
-  #boundUnlink = this.#unlink.bind(this)
   #_watchPaths
-  #_watcher
+  #watcher
   constructor($settings, $options, $parent) {
     super(...arguments)
     this.#parent = $parent
-    this.#watcher
+    this.addEvents([
+      // Watcher Add
+      {
+        path: 'watcher', type: 'add',
+        listener: async function watcherAdd($path) {
+          const processPath = path.join(process.env.PWD, $path)
+          const processImport = await import(processPath)
+          .then(($processImport) => $processImport.default)
+          Array.prototype.push.call(this, new this.Subclass(
+            Object.assign(processImport, {
+              fileReference: processPath
+            }), {}, this
+          ))
+          return this
+        }.bind(this),
+        target: { assign: 'on', deassign: 'off' },
+      },
+      // Watcher Change
+      {
+        path: 'watcher', type: 'change', 
+        listener: async function watcherChange($path) {
+          const processPath = path.join(process.env.PWD, $path).concat('?', Date.now())
+          const processImport = await import(processPath)
+          .then(($processImport) => $processImport.default)
+          const [$processIndex, $process] = this.getProcesses({ path: processImport.path })[0]
+          $process.active = false
+          delete this[$processIndex]
+          const splicedProcesses = Array.prototype.splice.call(this, $processIndex, 1, new this.Subclass(
+            Object.assign(processImport, {
+              fileReference: processPath
+            }), {}, this
+          ))
+          return this
+        }.bind(this),
+        target: { assign: 'on', deassign: 'off' },
+      },
+      // Watcher Unlink
+      {
+        path: 'watcher', type: 'unlink',
+        listener: async function watcherUnlink($path) {
+          const processPath = path.join(process.env.PWD, $path)
+          const [$processIndex, $process] = this.getProcesses({ fileReference: processPath })[0]
+          if($process) {
+            $process.active = false
+            Array.prototype.splice.call(this, $processIndex, 1)
+          }
+          return this
+        }.bind(this),
+        target: { assign: 'on', deassign: 'off' },
+      }
+    ])
+    Object.defineProperties(this, {
+      watcher: {
+        enumerable: true,
+        get() {
+          if(this.#watcher !== undefined) { return this.#watcher }
+          const watcher = watch(this.#watchPaths, {
+            ignoreInitial: false,
+            awaitWriteFinish: true,
+          })
+          this.#watcher = watcher
+          return this.#watcher
+        }
+      }
+    })
+    this.watcher
+    this.enableEvents({ path: 'watcher' })
   }
   get Subclass() { return this.settings.Subclass }
   get parent() { return this.#parent }
@@ -38,52 +101,6 @@ export default class Processes extends Core {
       this.#_watchPaths.push(watchPath)
     }
     return this.#_watchPaths
-  }
-  get #watcher() {
-    if(this.#_watcher !== undefined) { return this.#_watcher }
-    const watcher = watch(this.#watchPaths, {
-      ignoreInitial: false,
-      awaitWriteFinish: true,
-    })
-    watcher.on('add', this.#boundAdd)
-    watcher.on('change', this.#boundChange)
-    watcher.on('unlink', this.#boundUnlink)
-    this.#_watcher = watcher
-    return this.#_watcher
-  }
-  async #add($path) {
-    const processPath = path.join(process.env.PWD, $path)
-    const processImport = await import(processPath)
-    .then(($processImport) => $processImport.default)
-    Array.prototype.push.call(this, new this.Subclass(
-      Object.assign(processImport, {
-        fileReference: processPath
-      }), {}, this
-    ))
-    return this
-  }
-  async #change($path) {
-    const processPath = path.join(process.env.PWD, $path).concat('?', Date.now())
-    const processImport = await import(processPath)
-    .then(($processImport) => $processImport.default)
-    const [$processIndex, $process] = this.getProcesses({ path: processImport.path })[0]
-    $process.active = false
-    delete this[$processIndex]
-    const splicedProcesses = Array.prototype.splice.call(this, $processIndex, 1, new this.Subclass(
-      Object.assign(processImport, {
-        fileReference: processPath
-      }), {}, this
-    ))
-    return this
-  }
-  async #unlink($path) {
-    const processPath = path.join(process.env.PWD, $path)
-    const [$processIndex, $process] = this.getProcesses({ fileReference: processPath })[0]
-    if($process) {
-      $process.active = false
-      Array.prototype.splice.call(this, $processIndex, 1)
-    }
-    return this
   }
   getProcesses($filter) {
     const processes = []

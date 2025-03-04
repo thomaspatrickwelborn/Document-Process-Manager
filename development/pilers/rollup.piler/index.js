@@ -12,7 +12,7 @@ export default class RollupPiler extends Piler{
   #outputOptions
   constructor() {
     super(...arguments)
-    this.watcher
+    // this.watcher
   }
   get inputOptions() {
     if(
@@ -47,6 +47,6 @@ export default class RollupPiler extends Piler{
       }
       return rollupFile
     }
-    catch($err) { console.log($err) }
+    catch($err) { console.error($err) }
   }
 }

@@ -77,7 +77,7 @@ export default class DPMDocument extends Core {
         if($pilerType === 'sans') { continue iteratePilerTypes}
         this.pilers[$pilerType] = this.pilers[$pilerType] || []
         const Piler = Pilers[$piler.name]
-        const piler = new Piler($piler, this)
+        const piler = new Piler($piler, {}, this)
         piler.active = true
         this.pilers[$pilerType].push(piler)
       }
@@ -106,7 +106,7 @@ export default class DPMDocument extends Core {
     iterateSansPilers: 
     for(const $sansPiler of this.settings.pilers.sans || []) {
       if($sansPiler.name === "ClearPiler") {
-        const clearPiler = new Pilers.ClearPiler($sansPiler, this)
+        const clearPiler = new Pilers.ClearPiler($sansPiler, {}, this)
         depile.push(clearPiler.pile())
       }
     }

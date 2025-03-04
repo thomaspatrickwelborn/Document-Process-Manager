@@ -12,9 +12,9 @@ export default class EJSPiler extends Piler {
   #renderFileOptions
   #compileOptions
   #_root
-  constructor() {
+  constructor($settings, $options, $document) {
     super(...arguments)
-    this.watcher
+    // this.watcher
   }
   get outputType() { return this.settings.outputType }
   get model() {
@@ -75,7 +75,7 @@ export default class EJSPiler extends Piler {
         const writeFilePath = this.output
         await writeFile(writeFilePath, viewPileBeautify)
       }
-      catch($err) { console.log($err) }
+      catch($err) { console.error($err) }
     }
     // Client
     else if(settings.outputType === 'client') {
@@ -97,7 +97,7 @@ export default class EJSPiler extends Piler {
         .replace(new RegExp(/.ejs$/), '.js')
         await writeFile(viewPilePath, viewPileBeautify)
       }
-      catch($err) { console.log($err) }
+      catch($err) { console.error($err) }
     }
     return viewPileBeautify
   }

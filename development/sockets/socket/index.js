@@ -31,12 +31,14 @@ export default class Socket extends Core {
         listener: function webSocketServerClose() {
           this.#webSocketServer = undefined 
           this.#webSocket = undefined
-        },
+        }.bind(this),
         target: { assign: 'on', deassign: 'off' },
       },
       { 
         path: 'webSocketServer', type: 'error',
-        listener: function webSocketServerError($error) { console.error($error) },
+        listener: function webSocketServerError($error) {
+          console.error($error)
+        }.bind(this),
         target: { assign: 'on', deassign: 'off' },
       },
       // Web Socket Events
@@ -53,14 +55,16 @@ export default class Socket extends Core {
             }
             catch($err) { /* console.error($err) */ }
           }
-        },
+        }.bind(this),
         target: { assign: 'on', deassign: 'off' },
       },
       { 
         path: 'webSocket', type: 'error',
         listener: 
           this.settings?.error.bind(this) ||
-          function webSocketError($error) { console.error($error) }.bind(this),
+          function webSocketError($error) {
+            console.error($error)
+          }.bind(this),
         target: { assign: 'on', deassign: 'off' },
       },
       { 

@@ -1,7 +1,7 @@
+import { Core } from 'core-plex'
 import path from 'node:path'
 import watch from 'glob-watcher'
-export default class Adpiler extends EventTarget {
-  settings
+export default class Adpiler extends Core {
   document
   #active = false
   #input
@@ -9,11 +9,40 @@ export default class Adpiler extends EventTarget {
   #watch
   #ignore
   #watcher
-  #boundPile = this.pile.bind(this)
-  constructor($settings, $document) {
-    super()
-    this.settings = $settings
+  constructor($settings, $options, $document) {
+    super(...arguments)
     this.document = $document
+    this.addEvents([
+      {
+        path: 'watcher', type: 'add',
+        listener: this.pile.bind(this),
+        target: { assign: 'on', deassign: 'off' },
+      },
+      {
+        path: 'watcher', type: 'change',
+        listener: this.pile.bind(this),
+        target: { assign: 'on', deassign: 'off' },
+      }
+    ])
+    Object.defineProperties(this, {
+      watcher: {
+        enumerable: true,
+        get() {
+          if(this.#watcher !== undefined) { return this.#watcher }
+          if(this.watch === undefined) { return this.#watcher }
+          let watcher = watch(this.watch, {
+            ignored: this.ignore,
+            ignoreInitial: false,
+            awaitWriteFinish: true,
+          })
+          this.#watcher = watcher
+          this.enableEvents({ path: 'watcher' })
+          return this.#watcher
+        }
+      }
+    })
+    this.watcher
+    this.enableEvents()
   }
   get active() { return this.#active }
   set active($active) {
@@ -52,26 +81,12 @@ export default class Adpiler extends EventTarget {
   get ignore() {
     if(this.#ignore !== undefined) { return this.#ignore }
     this.#ignore = Array.prototype.concat(
-      // Settings - Ignore
       this.settings.ignore.map(
         ($ignorePath) => path.join(this.document.source, $ignorePath)
       ),
-      // Route - Ignore
       this.document.ignore
     )
     return this.#ignore
   }
-  get watcher() {
-    if(this.#watcher !== undefined) { return this.#watcher }
-    if(this.watch === undefined) { return this.#watcher }
-    let watcher = watch(this.watch, {
-      ignored: this.ignore,
-      ignoreInitial: false,
-      awaitWriteFinish: true,
-    })
-    watcher.on('add', ($path, $stats) => this.#boundPile($path))
-    watcher.on('change', ($path, $stats) => this.#boundPile($path))
-    this.#watcher = watcher
-    return this.#watcher
-  }
+  
 }
