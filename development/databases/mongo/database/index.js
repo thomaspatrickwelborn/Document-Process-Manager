@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
-import { Core } from 'core-plex'
+import Core from '../../../core/index.js'
 export default class MongoDatabase extends Core {
   #connection
   #path
@@ -7,9 +7,7 @@ export default class MongoDatabase extends Core {
   #active = false
   #_models
   constructor($settings, $options, $parent) {
-    super(Object.assign({
-      propertyClasses: MongoDatabase.propertyClasses,
-    }, $settings), $options)
+    super($settings, $options)
     this.#parent = $parent
     this.addEvents([
       // Connection Events

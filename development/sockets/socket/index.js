@@ -3,18 +3,15 @@ import { Buffer } from 'node:buffer'
 import { WebSocketServer } from 'ws'
 import MessageAdapter from './messageAdapter/index.js'
 import SocketEvent from './event/index.js'
-import { Core } from 'core-plex'
+import Core from '../../core/index.js'
 export default class Socket extends Core {
   #webSocketServer
   #webSocket
   #active = false
   #messageAdapters
   #parent
-  static propertyClasses = []
   constructor($settings, $options, $parent) {
-    super(Object.assign({}, $settings, {
-      propertyClasses: Socket.propertyClasses,
-    }), $options)
+    super($settings, $options)
     this.#parent = $parent
     this.addEvents([
       // Web Socket Server Events

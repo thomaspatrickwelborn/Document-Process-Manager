@@ -1,4 +1,4 @@
-import { Core } from 'core-plex'
+import Core from '../../core/index.js'
 import path from 'node:path'
 export default class Deadpiler extends Core {
   document

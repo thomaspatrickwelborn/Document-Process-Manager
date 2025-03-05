@@ -1,7 +1,7 @@
 import * as Pilers from '../../pilers/index.js'
 import path from 'node:path'
 import { rm } from 'node:fs/promises'
-import { Core } from 'core-plex'
+import Core from '../../core/index.js'
 const PilerTypes = [
   'sans',
   'simules',

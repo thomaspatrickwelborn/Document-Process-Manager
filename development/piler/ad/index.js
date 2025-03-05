@@ -1,4 +1,4 @@
-import { Core } from 'core-plex'
+import Core from '../../core/index.js'
 import path from 'node:path'
 import watch from 'glob-watcher'
 export default class Adpiler extends Core {

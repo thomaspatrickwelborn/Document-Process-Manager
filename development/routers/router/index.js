@@ -1,6 +1,6 @@
 import path from 'node:path'
 import express from 'express'
-import { Core } from 'core-plex'
+import Core from '../../core/index.js'
 export default class Router extends Core {
   #expressRouter
   #expressRoute

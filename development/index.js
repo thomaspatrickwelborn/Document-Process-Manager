@@ -1,6 +1,6 @@
-import { Core } from 'core-plex'
+import Core from './core/index.js'
 import './coutil/persist/index.js'
-import recursiveAssign from './coutil/recursiveAssign/index.js'
+import { recursiveAssign } from './coutil/index.js'
 import path from 'node:path'
 import inspector from 'node:inspector'
 import http from 'node:http'
@@ -13,7 +13,6 @@ import Sockets from './sockets/index.js'
 import Documents from './documents/index.js'
 import Databases from './databases/mongo/index.js'
 export default class DocumentProcessManager extends Core {
-  #settings
   #inspector
   #server
   #express
@@ -75,11 +74,15 @@ export default class DocumentProcessManager extends Core {
   get browserSync() {
     if(this.#browserSync !== undefined) { return this.#browserSync }
     if(this.settings.browserSync === undefined) return
+    const serverOptions = this.settings.server.https || this.settings.server.http
+    let serverProtocol
+    if(this.settings.server.https) { serverProtocol = "https://" }
+    else if(this.settings.server.http) { serverProtocol = "http://" }
     const browserSyncServerOptions = recursiveAssign(this.settings.browserSync, {
       proxy: {
-        target: "https://".concat(
-          this.settings.server.https.host, ":",
-          this.settings.server.https.port,
+        target: serverProtocol.concat(
+          serverOptions.host, ":",
+          serverOptions.port,
         ),
       },
     })
