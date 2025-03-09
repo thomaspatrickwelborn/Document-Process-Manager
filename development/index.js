@@ -1,6 +1,6 @@
 import Core from './core/index.js'
-import './coutil/persist/index.js'
 import { recursiveAssign } from './coutil/index.js'
+import './coutil/persist/index.js'
 import path from 'node:path'
 import inspector from 'node:inspector'
 import http from 'node:http'
