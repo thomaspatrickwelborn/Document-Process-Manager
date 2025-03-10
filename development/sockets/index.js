@@ -34,7 +34,7 @@ export default class Sockets extends Processes {
             }
           }
         }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       }
     ])
     this.enableEvents()

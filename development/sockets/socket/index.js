@@ -21,7 +21,7 @@ export default class Socket extends Core {
           this.#webSocket = undefined
           this.webSocket = $ws
         }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       { 
         path: 'webSocketServer', type: 'close',
@@ -29,14 +29,14 @@ export default class Socket extends Core {
           this.#webSocketServer = undefined 
           this.#webSocket = undefined
         }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       { 
         path: 'webSocketServer', type: 'error',
         listener: function webSocketServerError($error) {
           console.error($error)
         }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       // Web Socket Events
       { 
@@ -53,7 +53,7 @@ export default class Socket extends Core {
             catch($err) { /* console.error($err) */ }
           }
         }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       { 
         path: 'webSocket', type: 'error',
@@ -62,21 +62,21 @@ export default class Socket extends Core {
           function webSocketError($error) {
             console.error($error)
           }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       { 
         path: 'webSocket', type: 'open',
         listener: 
           this.settings?.open.bind(this) || 
           function webSocketOpen($event) { }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       { 
         path: 'webSocket', type: 'close',
         listener: 
           this.settings?.close.bind(this) ||
           function webSocketClose($event) { }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
     ])
     Object.defineProperties(this, {

@@ -14,18 +14,18 @@ export default class MongoDatabase extends Core {
       {
         path: 'connection', type: 'connected', 
         listener: function connectionConnected($event) { this.#models }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       {
         path: 'connection', type: 'close', 
         listener: function connectionClose($event) { this.#connection = undefined }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       {
         path: 'connection', type: 'error', 
         listener: function connectionError($error) { console.error($error) }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
-      }
+        assign: 'on', deassign: 'off',
+      },
     ])
     this.enableEvents()
     this.active = this.settings.active

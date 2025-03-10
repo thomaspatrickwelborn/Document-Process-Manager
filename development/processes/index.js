@@ -26,7 +26,7 @@ export default class Processes extends Core {
           ))
           return this
         }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       // Watcher Change
       {
@@ -45,7 +45,7 @@ export default class Processes extends Core {
           ))
           return this
         }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       // Watcher Unlink
       {
@@ -59,7 +59,7 @@ export default class Processes extends Core {
           }
           return this
         }.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       }
     ])
     Object.defineProperties(this, {

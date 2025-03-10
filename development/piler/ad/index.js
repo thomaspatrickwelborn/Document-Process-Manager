@@ -17,12 +17,12 @@ export default class Adpiler extends Core {
       {
         path: 'watcher', type: 'add',
         listener: this.pile.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       },
       {
         path: 'watcher', type: 'change',
         listener: this.pile.bind(this),
-        target: { assign: 'on', deassign: 'off' },
+        assign: 'on', deassign: 'off',
       }
     ])
     Object.defineProperties(this, {
