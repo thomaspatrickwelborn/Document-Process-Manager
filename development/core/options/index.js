@@ -1,1 +1,1 @@
-export default {}
+export default ($options) => Object.assign({}, $options)

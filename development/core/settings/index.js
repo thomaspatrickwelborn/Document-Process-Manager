@@ -1,1 +1,1 @@
-export default {}
+export default ($settings) => Object.assign({}, $settings)
