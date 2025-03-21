@@ -19,14 +19,11 @@ export default class Processes extends Core {
           const processPath = path.join(process.env.PWD, $path)
           const processImport = await import(processPath)
           .then(($processImport) => $processImport.default)
-          try {
-            Array.prototype.push.call(this, new this.Subclass(
-              Object.assign(processImport, {
-                fileReference: processPath
-              }), {}, this
-            ))
-          }
-          catch($err) { console.error($err) }
+          Array.prototype.push.call(this, new this.Subclass(
+            Object.assign(processImport, {
+              fileReference: processPath
+            }), {}, this
+          ))
           return this
         }.bind(this),
         assign: 'on', deassign: 'off',
@@ -38,8 +35,9 @@ export default class Processes extends Core {
           const processPath = path.join(process.env.PWD, $path).concat('?', Date.now())
           const processImport = await import(processPath)
           .then(($processImport) => $processImport.default)
-          try {
-            const [$processIndex, $process] = this.getProcesses({ path: processImport.path })[0]
+          const processes = this.getProcesses({ fileReference: processPath })
+          if(processes.length) {
+            const [$processIndex, $process] = processes[0]
             $process.active = false
             delete this[$processIndex]
             const splicedProcesses = Array.prototype.splice.call(this, $processIndex, 1, new this.Subclass(
@@ -48,7 +46,6 @@ export default class Processes extends Core {
               }), {}, this
             ))
           }
-          catch($err) { console.error($err) }
           return this
         }.bind(this),
         assign: 'on', deassign: 'off',
@@ -58,12 +55,12 @@ export default class Processes extends Core {
         path: 'watcher', type: 'unlink',
         listener: async function watcherUnlink($path) {
           const processPath = path.join(process.env.PWD, $path)
-          try {
-            const [$processIndex, $process] = this.getProcesses({ fileReference: processPath })[0]
+          const processes = this.getProcesses({ fileReference: processPath })
+          if(processes.length) {
+            const [$processIndex, $process] = processes[0]
             $process.active = false
             Array.prototype.splice.call(this, $processIndex, 1)
           }
-          catch($err) { console.error($err) }
           return this
         }.bind(this),
         assign: 'on', deassign: 'off',
@@ -117,7 +114,7 @@ export default class Processes extends Core {
       iterateFilterKeys: 
       for(const $filterKey of Object.keys($filter)) {
         if(match !== false) {
-          match = $filter[$filterKey] === $process.settings[$filterKey]
+          match = ($filter[$filterKey] === $process.settings[$filterKey])
         }
       }
       if(match) { processes.push([processIndex, $process]) }
