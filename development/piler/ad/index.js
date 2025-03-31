@@ -16,12 +16,12 @@ export default class Adpiler extends Core {
       // Watcher Events
       {
         path: 'watcher', type: 'add',
-        listener: this.pile.bind(this),
+        listener: this.pile,
         assign: 'on', deassign: 'off',
       },
       {
         path: 'watcher', type: 'change',
-        listener: this.pile.bind(this),
+        listener: this.pile,
         assign: 'on', deassign: 'off',
       }
     ])

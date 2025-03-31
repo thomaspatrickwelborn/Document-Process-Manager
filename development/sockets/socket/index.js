@@ -20,7 +20,7 @@ export default class Socket extends Core {
         listener: function webSocketServerConnection($ws) {
           this.#webSocket = undefined
           this.webSocket = $ws
-        }.bind(this),
+        },
         assign: 'on', deassign: 'off',
       },
       { 
@@ -28,14 +28,14 @@ export default class Socket extends Core {
         listener: function webSocketServerClose() {
           this.#webSocketServer = undefined 
           this.#webSocket = undefined
-        }.bind(this),
+        },
         assign: 'on', deassign: 'off',
       },
       { 
         path: 'webSocketServer', type: 'error',
         listener: function webSocketServerError($error) {
           console.error($error)
-        }.bind(this),
+        },
         assign: 'on', deassign: 'off',
       },
       // Web Socket Events
@@ -52,30 +52,30 @@ export default class Socket extends Core {
             }
             catch($err) { /* console.error($err) */ }
           }
-        }.bind(this),
+        },
         assign: 'on', deassign: 'off',
       },
       { 
         path: 'webSocket', type: 'error',
         listener: 
-          this.settings?.error.bind(this) ||
+          this.settings?.error ||
           function webSocketError($error) {
             console.error($error)
-          }.bind(this),
+          },
         assign: 'on', deassign: 'off',
       },
       { 
         path: 'webSocket', type: 'open',
         listener: 
-          this.settings?.open.bind(this) || 
-          function webSocketOpen($event) { }.bind(this),
+          this.settings?.open || 
+          function webSocketOpen($event) { },
         assign: 'on', deassign: 'off',
       },
       { 
         path: 'webSocket', type: 'close',
         listener: 
-          this.settings?.close.bind(this) ||
-          function webSocketClose($event) { }.bind(this),
+          this.settings?.close ||
+          function webSocketClose($event) { },
         assign: 'on', deassign: 'off',
       },
     ])

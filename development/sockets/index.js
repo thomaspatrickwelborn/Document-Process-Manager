@@ -33,7 +33,7 @@ export default class Sockets extends Processes {
               break iterateSockets
             }
           }
-        }.bind(this),
+        },
         assign: 'on', deassign: 'off',
       }
     ])

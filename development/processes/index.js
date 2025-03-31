@@ -19,35 +19,36 @@ export default class Processes extends Core {
           const processPath = path.join(process.env.PWD, $path)
           const processImport = await import(processPath)
           .then(($processImport) => $processImport.default)
-          Array.prototype.push.call(this, new this.Subclass(
+          const subprocess = new this.Subclass(
             Object.assign(processImport, {
               fileReference: processPath
             }), {}, this
-          ))
+          )
+          Array.prototype.push.call(this, subprocess)
           return this
-        }.bind(this),
+        },
         assign: 'on', deassign: 'off',
       },
       // Watcher Change
       {
         path: 'watcher', type: 'change', 
         listener: async function watcherChange($path) {
-          const processPath = path.join(process.env.PWD, $path).concat('?', Date.now())
-          const processImport = await import(processPath)
+          const processPath = path.join(process.env.PWD, $path)
+          const processPathDated = processPath.concat('?', Date.now())
+          const processImport = await import(processPathDated)
           .then(($processImport) => $processImport.default)
           const processes = this.getProcesses({ fileReference: processPath })
           if(processes.length) {
             const [$processIndex, $process] = processes[0]
-            $process.active = false
-            delete this[$processIndex]
-            const splicedProcesses = Array.prototype.splice.call(this, $processIndex, 1, new this.Subclass(
+            const subprocess = new this.Subclass(
               Object.assign(processImport, {
                 fileReference: processPath
               }), {}, this
-            ))
+            )
+            Array.prototype.splice.call(this, $processIndex, 1, subprocess)
           }
           return this
-        }.bind(this),
+        },
         assign: 'on', deassign: 'off',
       },
       // Watcher Unlink
@@ -62,7 +63,7 @@ export default class Processes extends Core {
             Array.prototype.splice.call(this, $processIndex, 1)
           }
           return this
-        }.bind(this),
+        },
         assign: 'on', deassign: 'off',
       }
     ])
