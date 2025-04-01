@@ -40,6 +40,7 @@ export default class Processes extends Core {
           const processes = this.getProcesses({ fileReference: processPath })
           if(processes.length) {
             const [$processIndex, $process] = processes[0]
+            $process.active = false
             const subprocess = new this.Subclass(
               Object.assign(processImport, {
                 fileReference: processPath

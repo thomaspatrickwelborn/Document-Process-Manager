@@ -22,7 +22,6 @@ export default class DPMDocument extends Core {
     this.#depile().then(($depile) => {
       this.active = this.settings.active
     })
-    console.log(this)
   }
   get parent() { return this.#parent }
   get active() { return this.#active }
