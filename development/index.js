@@ -26,6 +26,7 @@ export default class DocumentProcessManager extends Core {
     this.inspector
     this.databases
     this.documents
+    this.routers
     this.server
     this.sockets
     this.browserSync
@@ -43,40 +44,24 @@ export default class DocumentProcessManager extends Core {
   // Node Server
   get server() {
     if(this.#server !== undefined) { return this.#server }
-    if(this.settings.server === undefined) { this.#server === undefined }
-    if(this.settings.server.https) {
-      // Node HTTPS Server
-      this.#server = https.createServer(
-        this.settings.server.https,
-        this.routers.express
-      )
-      this.#server.listen(
-        this.settings.server.https.port, 
-        this.settings.server.https.host,
-        ($request, $response) => {}
-      )
-    }
-    else if(this.settings.server.http) {
-      // Node HTTPS Server
-      this.#server = http.createServer(
-        this.settings.server.http,
-        this.routers.express,
-      )
-      this.#server.once('error', ($err) => {
+    const serverSettings = this.settings.server.https || this.settings.server.http
+    const createServer = (this.settings.server.https) ? https.createServer 
+                       : (this.settings.server.http) ? http.createServer
+                       : undefined
+    if(serverSettings === undefined) { this.#server === undefined }
+    else {
+      this.#server = createServer(serverSettings, this.routers.express)
+      .on('error', ($err) => {
         if($err.code === 'EADDRINUSE') {
-          this.#server.closeAllConnections()
           this.#server.close()
+          this.#server.closeAllConnections()
           this.#server = null
-          this.#server.listen(
-            this.settings.server.http.port, 
-            this.settings.server.http.host,
-            ($request, $response) => {}
-          )
+          this.server
         }
       })
-      this.#server.listen(
-        this.settings.server.http.port, 
-        this.settings.server.http.host,
+      .listen(
+        serverSettings.port, 
+        serverSettings.host,
         ($request, $response) => {}
       )
     }

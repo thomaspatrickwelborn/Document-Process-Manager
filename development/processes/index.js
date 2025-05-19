@@ -107,6 +107,7 @@ export default class Processes extends Core {
     }
     return this.#_watchPaths
   }
+  get logErrors() { return this.settings.logErrors }
   getProcesses($filter) {
     const processes = []
     let processIndex = 0
