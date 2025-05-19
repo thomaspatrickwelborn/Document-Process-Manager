@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { globSync } from 'glob'
 import Piler from '../../piler/dead/index.js'
-import { rm, rmdir, readdir } from 'node:fs/promises'
+import { rm, readdir } from 'node:fs/promises'
 export default class ClearPiler extends Piler {
   #target
   #path
@@ -47,7 +47,7 @@ export default class ClearPiler extends Piler {
       if(depilePathDirectories.includes(depilePathDirectory) === false) {
         depilePathDirectories.push(depilePathDirectory)
       }
-      const removeFile = await rm($depilePath, { force: true })
+      const removeFile = await rm($depilePath, { force: true, recursive: true })
       depile = depile.concat(depile)
     }
     return depile
