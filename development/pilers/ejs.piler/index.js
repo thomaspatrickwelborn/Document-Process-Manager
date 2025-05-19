@@ -74,7 +74,9 @@ export default class EJSPiler extends Piler {
         const writeFilePath = this.output
         await writeFile(writeFilePath, viewPileBeautify)
       }
-      catch($err) { console.error($err) }
+      catch($err) {
+        if(this.document.parent.logErrors) console.error($err) 
+      }
     }
     // Client
     else if(settings.outputType === 'client') {
@@ -96,7 +98,9 @@ export default class EJSPiler extends Piler {
         .replace(new RegExp(/.ejs$/), '.js')
         await writeFile(viewPilePath, viewPileBeautify)
       }
-      catch($err) { console.error($err) }
+      catch($err) {
+        if(this.document.parent.logErrors) console.error($err) 
+      }
     }
     return viewPileBeautify
   }

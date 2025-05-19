@@ -33,6 +33,8 @@ export default class SASSPiler extends Piler {
       await writeFile(sassFileSourceMapPath, sassFileSourceMap)
       return sassFileCSS
     }
-    catch($err) { console.error($err) }
+    catch($err) {
+      if(this.document.parent.logErrors) console.error($err) 
+    }
   }
 }

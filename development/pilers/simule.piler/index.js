@@ -19,7 +19,9 @@ export default class SimulePiler extends Piler {
             recursive: true,
           })
         }
-        catch($err) { console.error($err) }
+        catch($err) {
+          if(this.document.parent.logErrors) { console.error($err)  }
+        }
       }
       else if(this.settings.outputType === 'glob') {
         try {
@@ -34,7 +36,9 @@ export default class SimulePiler extends Piler {
             recursive: true,
           })
         }
-        catch($err) { console.error($err) }
+        catch($err) {
+          if(this.document.parent.logErrors) { console.error($err)  }
+        }
       }
     }
   }
