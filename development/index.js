@@ -60,8 +60,20 @@ export default class DocumentProcessManager extends Core {
       // Node HTTPS Server
       this.#server = http.createServer(
         this.settings.server.http,
-        this.routers.express
+        this.routers.express,
       )
+      this.#server.once('error', ($err) => {
+        if($err.code === 'EADDRINUSE') {
+          this.#server.closeAllConnections()
+          this.#server.close()
+          this.#server = null
+          this.#server.listen(
+            this.settings.server.http.port, 
+            this.settings.server.http.host,
+            ($request, $response) => {}
+          )
+        }
+      })
       this.#server.listen(
         this.settings.server.http.port, 
         this.settings.server.http.host,
