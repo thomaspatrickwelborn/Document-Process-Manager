@@ -4,5 +4,9 @@
   "description": "Document Process Manager Demonstrament",
   "license": "ISC",
   "type": "module",
-  "main": "index.js"
+  "main": "index.js",
+  "dependencies": {
+    "core-plex": "^4.0.3",
+    "recourse": "^1.0.6"
+  }
 }

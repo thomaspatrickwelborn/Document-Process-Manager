@@ -1,4 +1,4 @@
-import { Core } from 'core-plex'
+import Core from 'core-plex'
 import Settings from './settings/index.js'
 import Options from './options/index.js'
 

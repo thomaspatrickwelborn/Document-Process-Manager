@@ -1,5 +1,4 @@
-import { Coutil } from 'core-plex'
-const { recursiveAssign, typeOf } = Coutil
+import { recursiveAssign, typeOf } from 'recourse'
 import createDir from './createDir/index.js'
 import parseValidProperties from "./parseValidProperties/index.js"
 import * as path from "./path/index.js"

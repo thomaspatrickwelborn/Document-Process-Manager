@@ -47,8 +47,11 @@ export default class ClearPiler extends Piler {
       if(depilePathDirectories.includes(depilePathDirectory) === false) {
         depilePathDirectories.push(depilePathDirectory)
       }
-      const removeFile = await rm($depilePath, { force: true, recursive: true })
-      depile = depile.concat(depile)
+      try {
+        const removeFile = await rm($depilePath, { force: true, recursive: true })
+        depile = depile.concat(depile)
+      }
+      catch($err) { console.error($err) }
     }
     return depile
   }

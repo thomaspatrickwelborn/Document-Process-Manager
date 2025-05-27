@@ -17,6 +17,7 @@ export default class SimulePiler extends Piler {
           await cp($path, copyPath, {
             force: true,
             recursive: true,
+            verbatimSymlinks: true,
           })
         }
         catch($err) {
@@ -34,6 +35,7 @@ export default class SimulePiler extends Piler {
           await cp($path, copyPath, {
             force: true,
             recursive: true,
+            verbatimSymlinks: true,
           })
         }
         catch($err) {
