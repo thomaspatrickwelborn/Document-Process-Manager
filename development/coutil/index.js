@@ -1,4 +1,3 @@
-import { recursiveAssign, typeOf } from 'recourse'
 import createDir from './createDir/index.js'
 import parseValidProperties from "./parseValidProperties/index.js"
 import * as path from "./path/index.js"
@@ -12,11 +11,10 @@ export {
   createDir,
   parseValidProperties,
   path,
-  recursiveAssign,
+  assign,
   regularExpressions,
   routeMethods,
   tree,
   typedObjectLiteral,
-  typeOf,
   variables,
 }

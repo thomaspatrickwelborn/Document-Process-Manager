@@ -1,4 +1,4 @@
-import { typeOf } from "../index.js"
+import { typeOf } from "recourse"
 export default function typedObjectLiteral($object) {
   if(typeOf($object) === 'object') { return {} }
   else if(typeOf($object) === 'array') { return [] }

@@ -7,7 +7,7 @@
   "main": "index.js",
   "dependencies": {
     "browser-sync": "^3.0.3",
-    "core-plex": "^4.0.4",
+    "core-plex": "^4.0.5",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "glob": "^11.0.1",
