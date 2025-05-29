@@ -1,13 +1,3 @@
-> [!WARNING]  
-> Early Stage Development  
-
-> [!CAUTION]  
-> Use At Own Risk  
-
-> [!NOTE]  
-> Interested in Document Process Manager? 
-> thomas.patrick.welborn@outlook.com
-
 # Document Process Manager (DPM)
 Document Process Manager ministrates web projects:  
  - Document (Markup Piler, Style Piler, Script Piler, etc.)  
