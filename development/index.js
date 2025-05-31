@@ -1,5 +1,5 @@
 import Core from './core/index.js'
-import { recursiveAssign } from './coutil/index.js'
+import { assign } from './coutil/index.js'
 import './coutil/persist/index.js'
 import path from 'node:path'
 import inspector from 'node:inspector'
@@ -58,6 +58,9 @@ export default class DocumentProcessManager extends Core {
           this.#server = null
           this.server
         }
+        else {
+          console.log($err)
+        }
       })
       .listen(
         serverSettings.port, 
@@ -75,7 +78,7 @@ export default class DocumentProcessManager extends Core {
     let serverProtocol
     if(this.settings.server.https) { serverProtocol = "https://" }
     else if(this.settings.server.http) { serverProtocol = "http://" }
-    const browserSyncServerOptions = recursiveAssign(this.settings.browserSync, {
+    const browserSyncServerOptions = assign(this.settings.browserSync, {
       proxy: {
         target: serverProtocol.concat(
           serverOptions.host, ":",
