@@ -55,17 +55,20 @@ export default class DocumentProcessManager extends Core {
         if($err.code === 'EADDRINUSE') {
           this.#server.close()
           this.#server.closeAllConnections()
-          this.#server = null
+          this.#server = undefined
           this.server
         }
         else {
-          console.log($err)
+          console.error($err)
         }
       })
       .listen(
         serverSettings.port, 
         serverSettings.host,
-        ($request, $response) => {}
+        ($request, $response) => {
+          // this.browserSync = undefined
+          // this.browserSync
+        }
       )
     }
     return this.#server
