@@ -2,16 +2,13 @@
   "name": "document-process-manager",
   "author": "Thomas Patrick Welborn",
   "description": "Document Process Manager (DPM)",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "license": "ISC",
   "type": "module",
   "main": "development/index.js",
   "scripts": {},
   "imports": {},
-  "workspaces": [
-    "development",
-    "demonstrament"
-  ],
+  "workspaces": ["development"],
   "bin": {
     "dpm": "./bin/index.js"
   },
