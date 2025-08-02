@@ -9,7 +9,7 @@ export default class DPMCore extends Core {
     super({
       events: $settings.events || {},
       propertyDefinitions: $settings.propertyDefinitions || {},
-      compandTree: $settings.compandTree || { maxDepth: 1 },
+      compand: $settings.compand || { maxDepth: 1 },
     })
     this.#settings = Settings($settings)
     this.#options = Options($options)

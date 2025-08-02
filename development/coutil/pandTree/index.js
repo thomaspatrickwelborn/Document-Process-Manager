@@ -2,7 +2,7 @@ import * as Variables from '../variables/index.js'
 import * as Path from '../path/index.js'
 import * as Tree from '../tree/index.js'
 import typedObjectLiteral from "../typedObjectLiteral/index.js"
-function impandTree($root, $tree) {
+function impand($root, $tree) {
   const typeofTree = typeof $tree
   const typeofRoot = typeof $root
   if(
@@ -20,7 +20,7 @@ function impandTree($root, $tree) {
   return tree
 }
 
-function expandTree($root, $tree) {
+function expand($root, $tree) {
   const typeofRoot = typeof $root
   const typeofTree = typeof $tree
   if(
@@ -41,5 +41,5 @@ function expandTree($root, $tree) {
   return tree
 }
 
-export { impandTree, expandTree }
+export { impand, expand }
 
