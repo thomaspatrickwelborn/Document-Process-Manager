@@ -14,7 +14,7 @@ export default class Processes extends Core {
     this.addEvents([
       // Watcher Add
       {
-        path: 'watcher', type: 'add',
+        path: 'watcher', pathMatch: false, type: 'add',
         listener: async function watcherAdd($path) {
           const processPath = path.join(process.env.PWD, $path)
           const processImport = await import(processPath)
@@ -31,7 +31,7 @@ export default class Processes extends Core {
       },
       // Watcher Change
       {
-        path: 'watcher', type: 'change', 
+        path: 'watcher', pathMatch: false, type: 'change', 
         listener: async function watcherChange($path) {
           const processPath = path.join(process.env.PWD, $path)
           const processPathDated = processPath.concat('?', Date.now())
@@ -54,7 +54,7 @@ export default class Processes extends Core {
       },
       // Watcher Unlink
       {
-        path: 'watcher', type: 'unlink',
+        path: 'watcher', pathMatch: false, type: 'unlink',
         listener: async function watcherUnlink($path) {
           const processPath = path.join(process.env.PWD, $path)
           const processes = this.getProcesses({ fileReference: processPath })
@@ -68,6 +68,7 @@ export default class Processes extends Core {
         assign: 'on', deassign: 'off',
       }
     ])
+    const $this = this
     Object.defineProperties(this, {
       watcher: {
         enumerable: true,
@@ -82,7 +83,6 @@ export default class Processes extends Core {
         }
       }
     })
-    this.watcher
     this.enableEvents({ path: 'watcher' })
   }
   get Subclass() { return this.settings.Subclass }

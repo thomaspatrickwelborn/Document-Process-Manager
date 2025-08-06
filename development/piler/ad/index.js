@@ -29,8 +29,10 @@ export default class Adpiler extends Core {
       watcher: {
         enumerable: true,
         get() {
-          if(this.#watcher !== undefined) { return this.#watcher }
-          if(this.watch === undefined) { return this.#watcher }
+          if(
+            this.#watcher !== undefined || 
+            this.watch === undefined
+          ) { return this.#watcher }
           let watcher = watch(this.watch, {
             ignored: this.ignore,
             ignoreInitial: false,
