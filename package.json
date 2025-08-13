@@ -2,7 +2,7 @@
   "name": "document-process-manager",
   "author": "Thomas Patrick Welborn",
   "description": "Document Process Manager (DPM)",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "license": "ISC",
   "type": "module",
   "main": "development/index.js",
