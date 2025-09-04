@@ -75,7 +75,7 @@ export default class DocumentProcessManager extends Core {
     let serverProtocol
     if(this.settings.server.https) { serverProtocol = "https://" }
     else if(this.settings.server.http) { serverProtocol = "http://" }
-    const browserSyncServerOptions = assign(this.settings.browserSync, {
+    const browserSyncServerOptions = assign(this.settings.browserSync, null, {
       proxy: {
         target: serverProtocol.concat(
           serverOptions.host, ":",
